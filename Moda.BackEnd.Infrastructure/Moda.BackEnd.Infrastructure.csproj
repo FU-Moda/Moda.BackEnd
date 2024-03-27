@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Moda.BackEnd.Domain\Moda.BackEnd.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>
