@@ -11,4 +11,8 @@
     <Folder Include="Models\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NetCore.QK.BackEndCore" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>
