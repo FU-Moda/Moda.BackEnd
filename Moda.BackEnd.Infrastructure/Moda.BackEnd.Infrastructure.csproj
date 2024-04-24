@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,12 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Moda.BackEnd.Application\Moda.BackEnd.Application.csproj" />
+    <ProjectReference Include="..\Moda.BackEnd.Common\Moda.BackEnd.Common.csproj" />
     <ProjectReference Include="..\Moda.BackEnd.Domain\Moda.BackEnd.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Mapping\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>

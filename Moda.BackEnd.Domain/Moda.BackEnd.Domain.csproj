@@ -1,18 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.22" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.22" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.design" Version="6.0.22">
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.22" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.20" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.22">
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
 
-  <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Models\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NetCore.QK.BackEndCore" Version="1.0.0" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Text.Json" Version="6.0.8" />
+	</ItemGroup>
 
 </Project>
