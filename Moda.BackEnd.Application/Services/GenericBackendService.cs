@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Moda.BackEnd.Application.Service
+namespace Moda.BackEnd.Application.Services
 {
     public class GenericBackendService
     {

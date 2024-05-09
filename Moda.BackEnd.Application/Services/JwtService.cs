@@ -17,7 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
-namespace Moda.BackEnd.Application.Service
+namespace Moda.BackEnd.Application.Services
 {
     public class JwtService : GenericBackendService, IJwtService
     {
