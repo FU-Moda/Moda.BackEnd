@@ -12,14 +12,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Moda.BackEnd.Application\Moda.BackEnd.Application.csproj" />
+    <ProjectReference Include="..\Moda.BackEnd.Common\Moda.BackEnd.Common.csproj" />
     <ProjectReference Include="..\Moda.BackEnd.Domain\Moda.BackEnd.Domain.csproj" />
     <ProjectReference Include="..\Moda.BackEnd.Infrastructure\Moda.BackEnd.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Installers\" />
     <Folder Include="Middlewares\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
