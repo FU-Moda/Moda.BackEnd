@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moda.Backend.Domain.Models;
@@ -40,6 +41,34 @@ namespace Moda.BackEnd.Domain.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "6a32e12a-60b5-4d93-8306-82231e1232d7",
+                Name = "ADMIN",
+                ConcurrencyStamp = "6a32e12a-60b5-4d93-8306-82231e1232d7",
+                NormalizedName = "admin"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "85b6791c-49d8-4a61-ad0b-8274ec27e764",
+                Name = "STAFF",
+                ConcurrencyStamp = "85b6791c-49d8-4a61-ad0b-8274ec27e764",
+                NormalizedName = "staff"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "814f9270-78f5-4503-b7d3-0c567e5812ba",
+                Name = "SHOP",
+                ConcurrencyStamp = "814f9270-78f5-4503-b7d3-0c567e5812ba",
+                NormalizedName = "shop"
+            });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
+            {
+                Id = "02962efa-1273-46c0-b103-7167b1742ef3",
+                Name = "CUSTOMER",
+                ConcurrencyStamp = "02962efa-1273-46c0-b103-7167b1742ef3",
+                NormalizedName = "customer"
+            });
             base.OnModelCreating(builder);
         }
 
