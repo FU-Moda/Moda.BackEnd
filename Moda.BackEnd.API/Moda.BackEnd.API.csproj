@@ -20,6 +20,7 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Middlewares\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
