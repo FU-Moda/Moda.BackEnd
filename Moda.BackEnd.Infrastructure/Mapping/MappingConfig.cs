@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Moda.Backend.Domain.Models;
+using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
 using Moda.BackEnd.Domain.Models;
 using System;
@@ -25,6 +27,22 @@ namespace Moda.BackEnd.Infrastructure.Mapping
               .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
               .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.UserName))
               ;
+
+                config.CreateMap<Product, ProductDto>()
+                .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+                .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+                .ForMember(desc => desc.ClothType, act => act.MapFrom(src => src.ClothType))
+                .ForMember(desc => desc.Gender, act => act.MapFrom(src => src.Gender))
+                .ForMember(desc => desc.ShopId, act => act.MapFrom(src => src.ShopId))
+                .ReverseMap();
+
+                config.CreateMap<StaticFile, StaticFileDto>()
+               .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+               .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
+               .ForMember(desc => desc.RatingId, act => act.MapFrom(src => src.RatingId))
+                ;
+
+
             });
             return mappingConfig;   
         }

@@ -46,6 +46,7 @@ namespace Moda.BackEnd.Application.Services
             _emailService = emailService;
             _tokenDto = new TokenDto();
             _mapper = mapper;
+            _emailService = emailService;
         }
 
 
@@ -121,12 +122,41 @@ namespace Moda.BackEnd.Application.Services
                     var verifyCode = string.Empty;
                     if (!isGoogle) verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
 
+                    var user = new Account
+                    {
+                        Email = signUpRequest.Email,
+                        UserName = signUpRequest.Email,
+                        FirstName = signUpRequest.FirstName,
+                        LastName = signUpRequest.LastName,
+                        PhoneNumber = signUpRequest.PhoneNumber,
+                        Gender = signUpRequest.Gender,
+                        VerifyCode = verifyCode,
+                        IsVerified = isGoogle ? true : false
+                    };
+                    var resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
+                    if (resultCreateUser.Succeeded)
+                    {
+                        result.Result = user;
+                        if (!isGoogle)
+                            emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                                TemplateMappingHelper.GetTemplateOTPEmail(
+                                    TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+                                    user.FirstName));
+                    }
+                    else
+                    {
+                        result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
+                    }
+
+                    var resultCreateRole = await _userManager.AddToRoleAsync(user, "CUSTOMER");
+                    if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền khách hàng không thành công");
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+
             return result;
         }
 
@@ -189,6 +219,70 @@ namespace Moda.BackEnd.Application.Services
                 var account = await _accountRepository.GetById(id);
                 if (account == null) result = BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
                 if (!BuildAppActionResultIsError(result)) result.Result = account;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                var roleRepository = Resolve<IRepository<IdentityRole>>();
+                var roleDb = await roleRepository!.GetById(Id);
+                if (roleDb != null)
+                {
+                    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
+                    {
+                        var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        result.Result = accountDb;
+                    }
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy vai trò với id {Id}");
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                var roleRepository = Resolve<IRepository<IdentityRole>>();
+                var roleDb = await roleRepository!.GetByExpression(r => r.NormalizedName.Equals(roleName.ToLower()));
+                if (roleDb != null)
+                {
+                    var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                    var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                    if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
+                    {
+                        var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                        var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                        result.Result = accountDb;
+                    }
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy vai trò {roleName}");
+                }
             }
             catch (Exception ex)
             {

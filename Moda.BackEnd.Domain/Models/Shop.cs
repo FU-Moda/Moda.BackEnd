@@ -1,4 +1,5 @@
 ﻿using Moda.BackEnd.Domain.Models;
+using Moda.BackEnd.Domain.Models.BaseModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

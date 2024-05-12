@@ -92,7 +92,11 @@ namespace Moda.BackEnd.Common.Utils
             public static string CHASSISNUMBER = "^[A-HJ-NPR-Z0-9]{12,17}$";
             public static string ENGINENUMBER = "^[A-Za-z0-9]{6,17}$";
             public static string PLATE = "^(?!13)[0-9]{2}[A-Z]{1}[A-Z0-9]{0,1}-[0-9]{4,5}$";
+        }
 
+        public class FirebasePathName
+        {
+            public static string PRODUCT_PREFIX = "product/";
         }
     }
 }

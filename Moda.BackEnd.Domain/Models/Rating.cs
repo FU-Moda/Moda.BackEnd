@@ -16,7 +16,7 @@ namespace Moda.Backend.Domain.Models
         public string Title { get; set; } = null!;
         public int RatingPoint { get; set; }
         public string Content { get; set; } = string.Empty;
-        public string AccountId { get; set; }
+        public string? AccountId { get; set; }
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }
         public Guid ProductId { get; set; }  

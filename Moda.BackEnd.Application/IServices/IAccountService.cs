@@ -37,5 +37,7 @@ namespace Moda.BackEnd.Application.IServices
         Task<AppActionResult> GoogleCallBack(string accessTokenFromGoogle);
 
         public Task<AppActionResult> SendEmailForActiveCode(string email);
+        Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
+        Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
     }
 }
