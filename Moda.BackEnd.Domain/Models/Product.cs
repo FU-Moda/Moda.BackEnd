@@ -1,4 +1,5 @@
 ﻿using Moda.BackEnd.Domain.Enum;
+using Moda.BackEnd.Domain.Models.BaseModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -20,7 +21,6 @@ namespace Moda.Backend.Domain.Models
         public Guid ShopId { get; set; }
         [ForeignKey(nameof(ShopId))]
         public Shop? Shop { get; set; }
-
 
     }
 }

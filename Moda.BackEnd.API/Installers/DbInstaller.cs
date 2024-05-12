@@ -1,6 +1,8 @@
 ﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moda.BackEnd.Domain.Data;
+using Moda.BackEnd.Domain.Models;
 
 namespace Moda.BackEnd.API.Installers
 {
@@ -12,6 +14,9 @@ namespace Moda.BackEnd.API.Installers
             {
                 option.UseSqlServer(configuration["ConnectionStrings:DB"]);
             });
+
+            services.AddIdentity<Account, IdentityRole>().AddEntityFrameworkStores<ModaDbContext>()
+     .AddDefaultTokenProviders();
         }
     }
 }
