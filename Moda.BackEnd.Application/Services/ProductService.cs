@@ -33,7 +33,7 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                var filebaseService = Resolve<IFirebaseService>();
+                var firebaseService = Resolve<IFirebaseService>();
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 var productStocksRepository = Resolve<IRepository<ProductStock>>();
 
@@ -68,7 +68,7 @@ namespace Moda.BackEnd.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     var pathName =  SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
-                    var upload = await filebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
+                    var upload = await firebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
                     await staticFileRepository!.Insert(new StaticFile
                     {
                         ProductId = productMapper.Id,

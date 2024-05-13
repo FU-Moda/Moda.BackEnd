@@ -9,7 +9,7 @@ namespace Moda.BackEnd.Common.DTO.Request
 {
     public class UpdateRatingDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public int RatingPoint { get; set; }
         public string Content { get; set; } = string.Empty;
