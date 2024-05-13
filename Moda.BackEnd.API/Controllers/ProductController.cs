@@ -58,10 +58,15 @@ namespace Moda.BackEnd.API.Controllers
             return await _productService.DeleteProduct(productId);  
         }
 
-        [HttpPut]
+        [HttpPut("update-product")]
         public async Task<AppActionResult> UpdateProduct([FromForm]ProductDto productDto)
         {
             return await _productService.UpdateProduct(productDto);     
+        }
+        [HttpGet("get-rating-by-product-id/{productId}/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _productService.GetProductRatingByProductId(productId, pageNumber, pageSize);
         }
     }
 }

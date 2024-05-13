@@ -10,8 +10,8 @@ namespace Moda.BackEnd.Application.IServices
 {
     public interface IFirebaseService
     {
-        public Task<AppActionResult> UploadImageToFirebase(IFormFile file, string pathFileName);
+        Task<AppActionResult> UploadFileToFirebase(IFormFile file, string pathFileName);
         public Task<string> GetUrlImageFromFirebase(string pathFileName);
-        public Task<AppActionResult> DeleteImageFromFirebase(string pathFileName);
+        public Task<AppActionResult> DeleteFileFromFirebase(string pathFileName);
     }
 }
