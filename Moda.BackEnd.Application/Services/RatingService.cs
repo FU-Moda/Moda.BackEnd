@@ -31,7 +31,7 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
-                var filebaseService = Resolve<IFirebaseService>();
+                var firebaseService = Resolve<IFirebaseService>();
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 var ratingDb = _mapper.Map<Rating>( dto );
                 ratingDb.Id = Guid.NewGuid();
@@ -46,7 +46,7 @@ namespace Moda.BackEnd.Application.Services
                     foreach (var img in dto.Img!)
                     {
                         pathName = SD.FirebasePathName.RATING_PREFIX + $"{ratingDb.Id} {random.Next(10000)}.jpg";
-                        var upload = await filebaseService!.UploadFileToFirebase(img, pathName);
+                        var upload = await firebaseService!.UploadFileToFirebase(img, pathName);
                         if (upload.Result != null)
                         {
                             await staticFileRepository!.Insert(new StaticFile
@@ -109,7 +109,7 @@ namespace Moda.BackEnd.Application.Services
                     result = BuildAppActionResultError(result, $"Không tìm thấy đánh giá với id {dto.Id}");
                     return result;
                 }
-                var filebaseService = Resolve<IFirebaseService>();
+                var firebaseService = Resolve<IFirebaseService>();
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 ratingDb = _mapper.Map<Rating>(dto);
                 ratingDb.CreateDate = DateTime.Now;
@@ -120,10 +120,18 @@ namespace Moda.BackEnd.Application.Services
                 {
                     Random random = new Random();
                     string pathName = null;
+                    var staticDb = await staticFileRepository!.GetAllDataByExpression(s => s.RatingId == dto.Id, 0, 0, null, false, null);
+                    if (staticDb.Items != null && staticDb.Items.Count > 0)
+                    {
+                        foreach (var item in staticDb.Items)
+                        {
+                            await firebaseService!.DeleteFileFromFirebase(item.Img);
+                        }
+                    }
                     foreach (var img in dto.Img!)
                     {
                         pathName = SD.FirebasePathName.RATING_PREFIX + $"{ratingDb.Id} {random.Next(10000)}.jpg";
-                        var upload = await filebaseService!.UploadFileToFirebase(img, pathName);
+                        var upload = await firebaseService!.UploadFileToFirebase(img, pathName);
                         if (upload.Result != null)
                         {
                             await staticFileRepository!.Insert(new StaticFile

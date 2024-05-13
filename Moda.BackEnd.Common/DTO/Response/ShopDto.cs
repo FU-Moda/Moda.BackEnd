@@ -17,6 +17,6 @@ namespace Moda.BackEnd.Common.DTO.Response
     public class ProductResponseDto
     {
         public Product Product { get; set; }
-        public string Img { get; set; }
+        public List<string> Img { get; set; }
     }
 }

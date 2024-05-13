@@ -26,9 +26,15 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPost("update-shop")]
-        public async Task<AppActionResult> UpdateShop(UpdateShopDto dto)
+        public async Task<AppActionResult> UpdateShop([FromBody]UpdateShopDto dto)
         {
             return await _service.UpdateShop(dto);
+        }
+
+        [HttpPost("create-shop")]
+        public async Task<AppActionResult> AddShop([FromBody]CreateShopDto dto)
+        {
+            return await _service.AddShop(dto);
         }
     }
 }

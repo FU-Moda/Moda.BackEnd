@@ -31,7 +31,8 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
-                var shop = new Shop
+                var shop = _mapper.Map<Shop>( dto );
+                shop.Id = Guid.NewGuid();
                 await _repository.Insert(shop);
                 await _unitOfWork.SaveChangesAsync();
             }
@@ -73,15 +74,15 @@ namespace Moda.BackEnd.Application.Services
                 var productDb = await productRepository!.GetAllDataByExpression(p => p.ShopId == Id, 0, 0, null, false, null);
                 if(productDb.Items != null && productDb.Items.Count > 0)
                 {
-                    StaticFile currentStaticFile = new StaticFile();
                     foreach(var product in productDb.Items)
                     {
-                        currentStaticFile = await staticFileRepository!.GetByExpression(s => s.ProductId != null && s.ProductId == product.Id);
-                        data.productResponseDtos.Add(
+                        var currentStaticFile = await staticFileRepository!.GetAllDataByExpression(s => s.ProductId == product.Id,0,0, null, false, null);
+                        List<string> imgs = currentStaticFile.Items!.Select(s => s.Img).ToList();
+                        data.productResponseDtos!.Add(
                             new ProductResponseDto
                             {
                                 Product = product,
-                                Img = currentStaticFile!.Img
+                                Img = imgs
                             });
                     }
                     result.Result = data;
