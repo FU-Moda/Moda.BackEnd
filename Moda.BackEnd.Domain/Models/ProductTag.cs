@@ -16,6 +16,6 @@ namespace Moda.BackEnd.Domain.Models
         public Product? Product { get; set; }
         public Guid TagId { get; set; }
         [ForeignKey(nameof(TagId))]
-        public Product? Tag { get; set; }
+        public Tag? Tag { get; set; }
     }
 }
