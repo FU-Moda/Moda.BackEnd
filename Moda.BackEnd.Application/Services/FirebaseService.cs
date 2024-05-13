@@ -1,8 +1,10 @@
-﻿using Firebase.Auth;
+﻿using DinkToPdf.Contracts;
+using Firebase.Auth;
 using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moda.BackEnd.Application.IServices;
+using Moda.BackEnd.Common.ConfigurationModel;
 using Moda.BackEnd.Common.DTO.Response;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -17,39 +19,44 @@ namespace Moda.BackEnd.Application.Services
 {
     public class FirebaseService : GenericBackendService, IFirebaseService
     {
+
+        private readonly IConverter _pdfConverter;
+        private AppActionResult _result;
+        private FirebaseConfiguration _firebaseConfiguration;
         private readonly IConfiguration _configuration;
-        public FirebaseService(IServiceProvider serviceProvider, IConfiguration configuration) : base(serviceProvider)
+        public FirebaseService(IConverter pdfConverter, IServiceProvider serviceProvider, IConfiguration configuration) : base(serviceProvider)
         {
-              _configuration = configuration;
+            _pdfConverter = pdfConverter;
+            _result = new();
+            _firebaseConfiguration = Resolve<FirebaseConfiguration>();
+            _configuration = configuration;
         }
 
-        public async Task<AppActionResult> DeleteImageFromFirebase(string pathFileName)
+        public async Task<AppActionResult> DeleteFileFromFirebase(string pathFileName)
         {
-            var result = new AppActionResult();
+            var _result = new AppActionResult();
             try
             {
-                var auth = new FirebaseAuthProvider(new FirebaseConfig(_configuration["Firebase:ApiKey"]));
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(_firebaseConfiguration.ApiKey));
 
-                var account = await auth.SignInWithEmailAndPasswordAsync(_configuration["Firebase:AuthEmail"],
-                    _configuration["Firebase:AuthPassword"]);
-                var cancellation = new CancellationTokenSource();
+                var account = await auth.SignInWithEmailAndPasswordAsync(_firebaseConfiguration.AuthEmail, _firebaseConfiguration.AuthPassword);
                 var storage = new FirebaseStorage(
-              _configuration["Firebase:Bucket"],
-              new FirebaseStorageOptions
-              {
-                  AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
-                  ThrowOnCancel = true
-              });
+             _firebaseConfiguration.Bucket,
+             new FirebaseStorageOptions
+             {
+                 AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
+                 ThrowOnCancel = true
+             });
                 await storage
                     .Child(pathFileName)
                     .DeleteAsync();
-                result.Messages.Add("Delete image successful");
+                _result.Messages.Add("Delete image successful");
             }
             catch (FirebaseStorageException ex)
             {
-                result.Messages.Add($"Error deleting image: {ex.Message}");
+                _result.Messages.Add($"Error deleting image: {ex.Message}");
             }
-            return result;
+            return _result;
         }
 
         public async Task<string> GetUrlImageFromFirebase(string pathFileName)
@@ -76,57 +83,48 @@ namespace Moda.BackEnd.Application.Services
             return string.Empty;
         }
 
-        public async Task<AppActionResult> UploadImageToFirebase(IFormFile file, string pathFileName)
+        public async Task<AppActionResult> UploadFileToFirebase(IFormFile file, string pathFileName)
         {
-            var result = new AppActionResult();
-            try
+            var _result = new AppActionResult();
+            bool isValid = true;
+            if (file == null || file.Length == 0)
             {
-                var isValid = true;
-                if (file == null || file.Length == 0)
+                isValid = false;
+                _result.Messages.Add("The file is empty");
+            }
+            if (isValid)
+            {
+                using (var memoryStream = new MemoryStream())
                 {
-                    isValid = false;
-                    result.Messages.Add("The file is empty");
-                }
-                if (isValid)
-                {
-                    using (var memoryStream = new MemoryStream())
+                    await file.CopyToAsync(memoryStream);
+                    var stream = new MemoryStream(memoryStream.ToArray());
+                    var auth = new FirebaseAuthProvider(new FirebaseConfig(_firebaseConfiguration.ApiKey));
+                    var account = await auth.SignInWithEmailAndPasswordAsync(_firebaseConfiguration.AuthEmail, _firebaseConfiguration.AuthPassword);
+                    string destinationPath = $"{pathFileName}";
+
+                    var task = new FirebaseStorage(
+                    _firebaseConfiguration.Bucket,
+                    new FirebaseStorageOptions
                     {
-                        await file!.CopyToAsync(memoryStream);
+                        AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
+                        ThrowOnCancel = true
+                    })
+                    .Child(destinationPath)
+                    .PutAsync(stream);
+                    var downloadUrl = await task;
 
-                        var stream = new MemoryStream(memoryStream.ToArray());
-                        var auth = new FirebaseAuthProvider(new FirebaseConfig(_configuration["Firebase:ApiKey"]));
-
-                        var account = await auth.SignInWithEmailAndPasswordAsync(_configuration["Firebase:AuthEmail"],
-                           _configuration["Firebase:AuthPassword"]);
-                        var cancellation = new CancellationTokenSource();
-
-                        var destinationPath = $"{pathFileName}";
-
-                        var task = new FirebaseStorage(
-                             _configuration["Firebase:Bucket"],
-                             new FirebaseStorageOptions
-                             {
-                                 AuthTokenAsyncFactory = () => Task.FromResult(account.FirebaseToken),
-                                 ThrowOnCancel = true
-                             })
-                         .Child(destinationPath)
-                         .PutAsync(stream, cancellation.Token);
-                        if (task != null)
-                        {
-                            result.Result = await GetUrlImageFromFirebase(pathFileName);
-                        }
-                        else
-                        {
-                            result.IsSuccess = false;
-                            result.Messages.Add("Upload failed");
-                        }
+                    if (task != null)
+                    {
+                        _result.Result = downloadUrl;
+                    }
+                    else
+                    {
+                        _result.IsSuccess = false;
+                        _result.Messages.Add("Upload failed");
                     }
                 }
-            } catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
             }
-            return result;
+            return _result;
         }
     }
 }

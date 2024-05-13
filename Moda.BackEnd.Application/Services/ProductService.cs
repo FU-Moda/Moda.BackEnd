@@ -67,13 +67,14 @@ namespace Moda.BackEnd.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
+                    var upload = await filebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
                     await staticFileRepository!.Insert(new StaticFile
                     {
                         ProductId = productMapper.Id,
-                        Img = pathName,
+                        Img = upload!.Result!.ToString()!,
                     });
                     await _unitOfWork.SaveChangesAsync();
-                    var upload = await filebaseService!.UploadImageToFirebase(productDto.File.Img, pathName);
+                  
                     if (upload.IsSuccess && upload.Result != null)
                         result.Messages.Add("Upload firebase successful");
                     result.Messages.Add(SD.ResponseMessage.CREATE_SUCCESSFULLY);
@@ -162,6 +163,43 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var productRatingRepository = Resolve<IRepository<Rating>>();
+                var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                var ratingResponseList = new List<RatingResponse>();
+                var productDb = await _productRepository.GetById(productId);
+                if (productDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
+                }
+                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.Account!);
+                if (ratingDb!.Items!.Count > 0 && ratingDb.Items != null)
+                {
+                    foreach (var item in ratingDb.Items)
+                    {
+                        RatingResponse ratingResponse = new RatingResponse();   
+                        var ratingImage = await staticFileRepository!.GetByExpression(p => p!.ProductId == item.Id);
+                        ratingResponse.Rating = item;
+                        ratingResponse.Image = ratingImage!.Img;
+                        ratingResponseList.Add(ratingResponse); 
+                    }
+                }
+                result.Result = new PagedResult<RatingResponse>
+                {
+                    Items = ratingResponseList
+                };
+            } 
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetProductStockByProductId(Guid productId)
         {
             var result = new AppActionResult();
@@ -186,7 +224,7 @@ namespace Moda.BackEnd.Application.Services
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 var productDetailRepository = Resolve<IRepository<ProductStock>>();
 
-                var productDb = await _productRepository.GetByExpression(p => p.Name.Equals(productDto.Name) && p.ShopId == productDto.ShopId);
+                var productDb = await _productRepository.GetByExpression(p => p!.Name.Equals(productDto.Name) && p.ShopId == productDto.ShopId);
                 if (productDb == null)
                 {
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
@@ -198,17 +236,26 @@ namespace Moda.BackEnd.Application.Services
                     result = BuildAppActionResultError(result, "File này không tồn tại");
                 }
 
-                var imageResult = firebaseService!.DeleteImageFromFirebase(oldFile!.Img);
+                var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb.Id}.jpg";
+                var imageResult = firebaseService!.DeleteFileFromFirebase(pathName);
                 if (imageResult != null)
                 {
                     result.Messages.Add("Delete image on firebase cloud successful");
                 }
 
-                var path = await staticFileRepository.GetById(productDb!.Id);
 
-                var upload = await firebaseService.UploadImageToFirebase(productDto!.File!.Img, path.Img);
+                var upload = await firebaseService.UploadFileToFirebase(productDto!.File!.Img, pathName);
+                if (upload.IsSuccess && upload.Result != null)
+                {
+                    result.Messages.Add("Upload image on firebase cloud successful");
+                    oldFile.Img = upload.Result.ToString()!;
+                }
+
+                _mapper.Map(productDto, productDb);
                 await _productRepository.Update(productDb);
+                await staticFileRepository.Update(oldFile);
                 await _unitOfWork.SaveChangesAsync();
+
             } 
             catch (Exception ex)
             {
