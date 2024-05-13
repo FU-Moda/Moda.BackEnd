@@ -110,9 +110,34 @@ namespace Moda.BackEnd.Application.Services
         public async Task<AppActionResult> GetAllProduct(int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
+            var staticFileRepository = Resolve<IRepository<StaticFile>>();
+            var productStockRepository = Resolve<IRepository<ProductStock>>();
+            var productResponseList = new List<ProductResponse>();      
             try
             {
-                result.Result = await _productRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false , null);
+                var productList = await _productRepository.GetAllDataByExpression(null, pageNumber, pageSize, null , false, p => p.Shop!, p => p.Shop!);
+                if (productList!.Items!.Count > 0 && productList.Items != null)
+                {
+                    foreach (var item in productList.Items)
+                    {
+                        var productResponse = new ProductResponse();
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
+                        var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
+                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        {
+                            foreach (var staticFile in staticFileDb.Items)
+                            {
+                                productResponse.Image = staticFile.Img;     
+                            }
+                            productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
+                            productResponseList.Add(productResponse);
+                        }
+                    }
+                    result.Result = new PagedResult<ProductResponse>
+                    {
+                        Items = productResponseList
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -176,7 +201,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
-                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.Account!);
+                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.CreateByAccount!);
                 if (ratingDb!.Items!.Count > 0 && ratingDb.Items != null)
                 {
                     foreach (var item in ratingDb.Items)
