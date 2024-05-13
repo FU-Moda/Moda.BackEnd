@@ -125,6 +125,7 @@ namespace Moda.BackEnd.Application.Services
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
                         if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
+                            productResponse.Product = item;
                             productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
                             productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
                             productResponseList.Add(productResponse);
@@ -132,7 +133,8 @@ namespace Moda.BackEnd.Application.Services
                     }
                     result.Result = new PagedResult<ProductResponse>
                     {
-                        Items = productResponseList
+                        Items = productResponseList,
+                        TotalPages = productList.TotalPages
                     };
                 }
             }
@@ -148,7 +150,31 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                result.Result = await _productRepository.GetAllDataByExpression(p => p.ClothType == productFilter.ClothType || p.Gender == productFilter.Gender, pageNumber, pageSize, null, false, null);
+                var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                var productStockRepository = Resolve<IRepository<ProductStock>>();
+                var productResponseList = new List<ProductResponse>();
+                var productList = await _productRepository.GetAllDataByExpression(p => p.ClothType == productFilter.ClothType || p.Gender == productFilter.Gender, pageNumber, pageSize, null, false, p => p.Shop!);
+                if (productList!.Items!.Count > 0 && productList.Items != null)
+                {
+                    foreach (var item in productList.Items)
+                    {
+                        var productResponse = new ProductResponse();
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
+                        var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
+                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        {
+                            productResponse.Product = item;
+                            productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
+                            productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
+                            productResponseList.Add(productResponse);
+                        }
+                    }
+                    result.Result = new PagedResult<ProductResponse>
+                    {
+                        Items = productResponseList,
+                        TotalPages = productList.TotalPages,    
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -162,7 +188,23 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult(); 
             try
             {
-                result.Result = await _productRepository.GetById(productId);
+                var productDb = await _productRepository.GetByExpression(p => p.Id == productId, p => p.Shop!);
+                var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                var productStockRepository = Resolve<IRepository<ProductStock>>();
+                var productResponse = new ProductResponse();
+                if (productDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
+                }
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, p => p.Warehouse!);
+                var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, p => p.Rating!);
+                if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                {
+                    productResponse.Product = productDb!;
+                    productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
+                    productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
+                }
+                result.Result = productResponse;    
             } 
             catch (Exception ex)
             {
@@ -174,9 +216,33 @@ namespace Moda.BackEnd.Application.Services
         public async Task<AppActionResult> GetProductByShopId(Guid shopId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
+            var staticFileRepository = Resolve<IRepository<StaticFile>>();
+            var productStockRepository = Resolve<IRepository<ProductStock>>();
+            var productResponseList = new List<ProductResponse>();
             try
             {
-                result.Result = await _productRepository.GetByExpression(p => p!.ShopId == shopId, p => p.Shop!);
+                var productList = await _productRepository.GetAllDataByExpression(p => p.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Shop!);
+                if (productList!.Items!.Count > 0 && productList.Items != null)
+                {
+                    foreach (var item in productList.Items)
+                    {
+                        var productResponse = new ProductResponse();
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
+                        var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
+                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        {
+                            productResponse.Product = item;
+                            productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
+                            productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
+                            productResponseList.Add(productResponse);
+                        }
+                    }
+                    result.Result = new PagedResult<ProductResponse>
+                    {
+                        Items = productResponseList,
+                        TotalPages = productList.TotalPages
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -212,7 +278,8 @@ namespace Moda.BackEnd.Application.Services
                 }
                 result.Result = new PagedResult<RatingResponse>
                 {
-                    Items = ratingResponseList
+                    Items = ratingResponseList,
+                    TotalPages = ratingDb.TotalPages,
                 };
             } 
             catch (Exception ex)
