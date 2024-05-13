@@ -25,6 +25,7 @@ namespace Moda.BackEnd.Common.DTO.Request
     {
         public Size.ClothingSize? ClothingSize { get; set; }
         public Size.ShoeSize? ShoeSize { get; set; }
+        public double Price { get; set; }
         public int Quantity { get; set; }
         public Guid WarehouseId { get; set; }   
     }

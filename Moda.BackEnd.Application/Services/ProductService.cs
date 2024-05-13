@@ -60,18 +60,19 @@ namespace Moda.BackEnd.Application.Services
                             ClothingSize = item.ClothingSize,
                             ShoeSize = item.ShoeSize,
                             WarehouseId = item.WarehouseId, 
+                            Price = item.Price, 
                         });
                     }
 
                     await productStocksRepository!.InsertRange(productStockList);
                     await _unitOfWork.SaveChangesAsync();
 
-                    var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
+                    var pathName =  SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
                     var upload = await filebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
                     await staticFileRepository!.Insert(new StaticFile
                     {
                         ProductId = productMapper.Id,
-                        Img = upload!.Result!.ToString()!,
+                        Img = "https://firebasestorage.googleapis.com/v0/b/hcqs-project.appspot.com/o/" + upload!.Result!.ToString()!,
                     });
                     await _unitOfWork.SaveChangesAsync();
                   
@@ -272,7 +273,6 @@ namespace Moda.BackEnd.Application.Services
                         RatingResponse ratingResponse = new RatingResponse();   
                         var ratingImage = await staticFileRepository!.GetByExpression(p => p!.ProductId == item.Id);
                         ratingResponse.Rating = item;
-                        ratingResponse.Image = ratingImage!.Img;
                         ratingResponseList.Add(ratingResponse); 
                     }
                 }
