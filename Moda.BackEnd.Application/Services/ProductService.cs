@@ -219,7 +219,7 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             var staticFileRepository = Resolve<IRepository<StaticFile>>();
             var productStockRepository = Resolve<IRepository<ProductStock>>();
-            var productResponseList = new List<ProductResponse>();
+            var productResponseList = new List<ProductDetailResponse>();
             try
             {
                 var productList = await _productRepository.GetAllDataByExpression(p => p.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Shop!);
@@ -227,18 +227,18 @@ namespace Moda.BackEnd.Application.Services
                 {
                     foreach (var item in productList.Items)
                     {
-                        var productResponse = new ProductResponse();
+                        var productResponse = new ProductDetailResponse();
                         var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
                         if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
                             productResponse.Product = item;
-                            productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
+                            productResponse.StaticFile = staticFileDb.Items.ToList();
                             productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
                             productResponseList.Add(productResponse);
                         }
                     }
-                    result.Result = new PagedResult<ProductResponse>
+                    result.Result = new PagedResult<ProductDetailResponse>
                     {
                         Items = productResponseList,
                         TotalPages = productList.TotalPages
