@@ -17,6 +17,7 @@ namespace Moda.BackEnd.Domain.Models
         public Size.ClothingSize? ClothingSize { get; set; }
         public Size.ShoeSize? ShoeSize { get; set; }
         public int Quantity { get; set; }
+        public double Price { get; set; }
         public Guid ProductId { get; set; }
         [ForeignKey(nameof(ProductId))]
         public Product? Product { get; set; }

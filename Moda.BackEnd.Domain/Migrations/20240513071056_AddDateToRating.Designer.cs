@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Moda.BackEnd.Domain.Data;
 
@@ -11,9 +12,10 @@ using Moda.BackEnd.Domain.Data;
 namespace Moda.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(ModaDbContext))]
-    partial class ModaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240513071056_AddDateToRating")]
+    partial class AddDateToRating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -520,6 +522,9 @@ namespace Moda.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccountId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -548,6 +553,8 @@ namespace Moda.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("CreateBy");
 
@@ -834,7 +841,7 @@ namespace Moda.BackEnd.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Moda.BackEnd.Domain.Models.Tag", "Tag")
+                    b.HasOne("Moda.Backend.Domain.Models.Product", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -847,6 +854,10 @@ namespace Moda.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Rating", b =>
                 {
+                    b.HasOne("Moda.BackEnd.Domain.Models.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
                     b.HasOne("Moda.BackEnd.Domain.Models.Account", "CreateByAccount")
                         .WithMany()
                         .HasForeignKey("CreateBy")
@@ -862,6 +873,8 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.HasOne("Moda.BackEnd.Domain.Models.Account", "UpdateByAccount")
                         .WithMany()
                         .HasForeignKey("UpdateBy");
+
+                    b.Navigation("Account");
 
                     b.Navigation("CreateByAccount");
 
