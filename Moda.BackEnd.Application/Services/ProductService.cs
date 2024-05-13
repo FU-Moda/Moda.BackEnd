@@ -271,7 +271,7 @@ namespace Moda.BackEnd.Application.Services
                     foreach (var item in ratingDb.Items)
                     {
                         RatingResponse ratingResponse = new RatingResponse();   
-                        var ratingImage = await staticFileRepository!.GetByExpression(p => p!.ProductId == item.Id);
+                        var ratingImage = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == item.Id, 0, 0, null, false, null);
                         ratingResponse.Rating = item;
                         ratingResponseList.Add(ratingResponse); 
                     }

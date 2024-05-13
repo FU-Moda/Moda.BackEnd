@@ -96,7 +96,9 @@ namespace Moda.BackEnd.Common.Utils
 
         public class FirebasePathName
         {
+            public static string BASE_URL = "https://firebasestorage.googleapis.com/v0/b/hcqs-project.appspot.com/o/";
             public static string PRODUCT_PREFIX = "product/";
+            public static string RATING_PREFIX = "rating/";
         }
     }
 }

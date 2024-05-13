@@ -23,6 +23,8 @@ namespace Moda.BackEnd.API.Installers
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IFirebaseService, FirebaseService>();
+            services.AddScoped<IShopService, ShopService>();
+            services.AddScoped<IRatingService, RatingService>();
         }
     }
 }
