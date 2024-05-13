@@ -72,7 +72,7 @@ namespace Moda.BackEnd.Application.Services
                     await staticFileRepository!.Insert(new StaticFile
                     {
                         ProductId = productMapper.Id,
-                        Img = "https://firebasestorage.googleapis.com/v0/b/hcqs-project.appspot.com/o/" + upload!.Result!.ToString()!,
+                        Img = upload!.Result!.ToString()!,
                     });
                     await _unitOfWork.SaveChangesAsync();
                   
