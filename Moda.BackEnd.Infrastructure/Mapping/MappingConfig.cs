@@ -42,7 +42,29 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                .ForMember(desc => desc.RatingId, act => act.MapFrom(src => src.RatingId))
                 ;
 
+                config.CreateMap<CreateRatingRequest, Rating>()
+                .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+                .ForMember(desc => desc.RatingPoint, act => act.MapFrom(src => src.RatingPoint))
+                .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+                .ForMember(desc => desc.CreateBy, act => act.MapFrom(src => src.AccountId))
+                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
+                .ReverseMap();
 
+                config.CreateMap<UpdateRatingDto, Rating>()
+                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+                .ForMember(desc => desc.Title, act => act.MapFrom(src => src.Title))
+                .ForMember(desc => desc.RatingPoint, act => act.MapFrom(src => src.RatingPoint))
+                .ForMember(desc => desc.Content, act => act.MapFrom(src => src.Content))
+                .ForMember(desc => desc.CreateBy, act => act.MapFrom(src => src.AccountId))
+                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
+                .ReverseMap();
+
+                config.CreateMap<CreateShopDto, Shop>()
+               .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+               .ForMember(desc => desc.Address, act => act.MapFrom(src => src.Address))
+               .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+               .ForMember(desc => desc.AccountId, act => act.MapFrom(src => src.AccountId))
+                ;
             });
             return mappingConfig;   
         }

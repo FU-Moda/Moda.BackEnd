@@ -66,7 +66,7 @@ namespace Moda.BackEnd.Application.Services
                     await productStocksRepository!.InsertRange(productStockList);
                     await _unitOfWork.SaveChangesAsync();
 
-                    var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
+                    var pathName = $"{SD.FirebasePathName.PRODUCT_PREFIX}{productMapper.Id}";
                     var upload = await filebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
                     await staticFileRepository!.Insert(new StaticFile
                     {
@@ -176,21 +176,22 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
-                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.Account!);
+                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.CreateBy!);
                 if (ratingDb!.Items!.Count > 0 && ratingDb.Items != null)
                 {
                     foreach (var item in ratingDb.Items)
                     {
                         RatingResponse ratingResponse = new RatingResponse();   
-                        var ratingImage = await staticFileRepository!.GetByExpression(p => p!.ProductId == item.Id);
+                        var ratingImage = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == item.Id, 0, 0, null, false, null);
                         ratingResponse.Rating = item;
-                        ratingResponse.Image = ratingImage!.Img;
+                        ratingResponse.Image = ratingImage.Items!.Select(r => r.Img).ToList();
                         ratingResponseList.Add(ratingResponse); 
                     }
                 }
                 result.Result = new PagedResult<RatingResponse>
                 {
-                    Items = ratingResponseList
+                    Items = ratingResponseList,
+                    TotalPages = (ratingResponseList.Count % pageSize == 0)? ratingResponseList.Count / pageSize: ratingResponseList.Count / pageSize + 1
                 };
             } 
             catch (Exception ex)
