@@ -12,6 +12,6 @@ namespace Moda.BackEnd.Common.DTO.Response
     {
         public Product Product { get; set; } = null!;
         public ProductStock ProductStock { get; set; } = null!;
-        public string Image { get; set; } = null!;
+        public StaticFile StaticFile { get; set; } = null!;
     }
 }

@@ -125,10 +125,7 @@ namespace Moda.BackEnd.Application.Services
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
                         if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
-                            foreach (var staticFile in staticFileDb.Items)
-                            {
-                                productResponse.Image = staticFile.Img;     
-                            }
+                            productResponse.StaticFile = staticFileDb!.Items.FirstOrDefault()!;
                             productResponse.ProductStock = productStockDb!.Items.FirstOrDefault()!;
                             productResponseList.Add(productResponse);
                         }
