@@ -272,8 +272,12 @@ namespace Moda.BackEnd.Application.Services
                     {
                         RatingResponse ratingResponse = new RatingResponse();   
                         var ratingImage = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == item.Id, 0, 0, null, false, null);
-                        ratingResponse.Rating = item;
-                        ratingResponseList.Add(ratingResponse); 
+                        if (ratingImage!.Items!.Count > 0 && ratingImage.Items != null)
+                        {
+                            ratingResponse.Rating = item;
+                            ratingResponse.Image = ratingImage.Items.Select(p => p.Img).ToList();
+                            ratingResponseList.Add(ratingResponse);
+                        }
                     }
                 }
                 result.Result = new PagedResult<RatingResponse>
