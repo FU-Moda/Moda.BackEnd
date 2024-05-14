@@ -12,10 +12,9 @@ namespace Moda.BackEnd.Domain.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public Guid ProductStockId { get; set; }
-        [ForeignKey(nameof(ProductStockId))]
-        public ProductStock? ProductStock { get; set; }
-        public int Size { get; set; }   
+        public string AccountId { get; set; } = null!;
+        [ForeignKey(nameof(AccountId))]
+        public Account? Account { get; set; }
         public double Total { get; set; }   
     }
 }

@@ -36,6 +36,12 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                 .ForMember(desc => desc.ShopId, act => act.MapFrom(src => src.ShopId))
                 .ReverseMap();
 
+                config.CreateMap<CartDetail, CartDetailDto>()
+                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
+                .ForMember(desc => desc.Count, act => act.MapFrom(src => src.Count))
+                ;
+
+
                 config.CreateMap<StaticFile, StaticFileDto>()
                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
