@@ -10,7 +10,7 @@ namespace Moda.BackEnd.Common.DTO.Response
     public class RatingResponse
     {
         public Rating Rating { get; set; } = null!;
-        public List<string> Image { get; set; } = null!; 
+        public List<string>? Image { get; set; } = null!; 
 
     }
 }

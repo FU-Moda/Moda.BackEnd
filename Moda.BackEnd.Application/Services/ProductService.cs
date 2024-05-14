@@ -59,15 +59,15 @@ namespace Moda.BackEnd.Application.Services
                             Quantity = item.Quantity,
                             ClothingSize = item.ClothingSize,
                             ShoeSize = item.ShoeSize,
-                            WarehouseId = item.WarehouseId, 
-                            Price = item.Price, 
+                            WarehouseId = item.WarehouseId,
+                            Price = item.Price,
                         });
                     }
 
                     await productStocksRepository!.InsertRange(productStockList);
                     await _unitOfWork.SaveChangesAsync();
 
-                    var pathName =  SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
+                    var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
                     var upload = await firebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
                     await staticFileRepository!.Insert(new StaticFile
                     {
@@ -75,7 +75,7 @@ namespace Moda.BackEnd.Application.Services
                         Img = upload!.Result!.ToString()!,
                     });
                     await _unitOfWork.SaveChangesAsync();
-                  
+
                     if (upload.IsSuccess && upload.Result != null)
                         result.Messages.Add("Upload firebase successful");
                     result.Messages.Add(SD.ResponseMessage.CREATE_SUCCESSFULLY);
@@ -99,7 +99,7 @@ namespace Moda.BackEnd.Application.Services
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
                 await _productRepository.DeleteById(productId);
-                await _unitOfWork.SaveChangesAsync();       
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -113,10 +113,10 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             var staticFileRepository = Resolve<IRepository<StaticFile>>();
             var productStockRepository = Resolve<IRepository<ProductStock>>();
-            var productResponseList = new List<ProductResponse>();      
+            var productResponseList = new List<ProductResponse>();
             try
             {
-                var productList = await _productRepository.GetAllDataByExpression(null, pageNumber, pageSize, null , false, p => p.Shop!, p => p.Shop!);
+                var productList = await _productRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.Shop!, p => p.Shop!);
                 if (productList!.Items!.Count > 0 && productList.Items != null)
                 {
                     foreach (var item in productList.Items)
@@ -173,7 +173,7 @@ namespace Moda.BackEnd.Application.Services
                     result.Result = new PagedResult<ProductResponse>
                     {
                         Items = productResponseList,
-                        TotalPages = productList.TotalPages,    
+                        TotalPages = productList.TotalPages,
                     };
                 }
             }
@@ -186,7 +186,7 @@ namespace Moda.BackEnd.Application.Services
 
         public async Task<AppActionResult> GetProductById(Guid productId)
         {
-            var result = new AppActionResult(); 
+            var result = new AppActionResult();
             try
             {
                 var productDb = await _productRepository.GetByExpression(p => p.Id == productId, p => p.Shop!);
@@ -205,8 +205,8 @@ namespace Moda.BackEnd.Application.Services
                     productResponse.StaticFile = staticFileDb!.Items;
                     productResponse.ProductStock = productStockDb!.Items;
                 }
-                result.Result = productResponse;    
-            } 
+                result.Result = productResponse;
+            }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
@@ -265,19 +265,16 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
-                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false,p => p.CreateByAccount!);
+                var ratingDb = await productRatingRepository!.GetAllDataByExpression(p => p.ProductId == productId, pageNumber, pageSize, null, false, p => p.CreateByAccount!);
                 if (ratingDb!.Items!.Count > 0 && ratingDb.Items != null)
                 {
                     foreach (var item in ratingDb.Items)
                     {
-                        RatingResponse ratingResponse = new RatingResponse();   
-                        var ratingImage = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == item.Id, 0, 0, null, false, null);
-                        if (ratingImage!.Items!.Count > 0 && ratingImage.Items != null)
-                        {
-                            ratingResponse.Rating = item;
-                            ratingResponse.Image = ratingImage.Items.Select(p => p.Img).ToList();
-                            ratingResponseList.Add(ratingResponse);
-                        }
+                        RatingResponse ratingResponse = new RatingResponse();
+                        var ratingImage = await staticFileRepository!.GetAllDataByExpression(p => p!.RatingId == item.Id, 0, 0, null, false, null);
+                        ratingResponse.Rating = item;
+                        ratingResponse.Image = ratingImage!.Items!.Select(p => p.Img).ToList();
+                        ratingResponseList.Add(ratingResponse);
                     }
                 }
                 result.Result = new PagedResult<RatingResponse>
@@ -285,7 +282,7 @@ namespace Moda.BackEnd.Application.Services
                     Items = ratingResponseList,
                     TotalPages = ratingDb.TotalPages,
                 };
-            } 
+            }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
@@ -349,7 +346,7 @@ namespace Moda.BackEnd.Application.Services
                 await staticFileRepository.Update(oldFile);
                 await _unitOfWork.SaveChangesAsync();
 
-            } 
+            }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");

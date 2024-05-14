@@ -26,6 +26,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
               .ForMember(desc => desc.LastName, act => act.MapFrom(src => src.LastName))
               .ForMember(desc => desc.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))
               .ForMember(desc => desc.UserName, act => act.MapFrom(src => src.UserName))
+              .ReverseMap()
               ;
 
                 config.CreateMap<Product, ProductDto>()
@@ -36,13 +37,24 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                 .ForMember(desc => desc.ShopId, act => act.MapFrom(src => src.ShopId))
                 .ReverseMap();
 
- 
+                config.CreateMap<Coupon, CouponDto>()
+               .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+               .ForMember(desc => desc.Code, act => act.MapFrom(src => src.Code))
+               .ForMember(desc => desc.StartDate, act => act.MapFrom(src => src.StartDate))
+               .ForMember(desc => desc.EndDate, act => act.MapFrom(src => src.EndDate))
+               .ForMember(desc => desc.ConditionAmount, act => act.MapFrom(src => src.ConditionAmount))
+               .ForMember(desc => desc.Percent, act => act.MapFrom(src => src.Percent))
+               .ForMember(desc => desc.Amount, act => act.MapFrom(src => src.Amount))
+                .ReverseMap();
+
+
 
 
                 config.CreateMap<StaticFile, StaticFileDto>()
                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
                .ForMember(desc => desc.RatingId, act => act.MapFrom(src => src.RatingId))
+               .ReverseMap();   
                 ;
 
                 config.CreateMap<CreateRatingRequest, Rating>()
@@ -67,6 +79,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                .ForMember(desc => desc.Address, act => act.MapFrom(src => src.Address))
                .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
                .ForMember(desc => desc.AccountId, act => act.MapFrom(src => src.AccountId))
+               .ReverseMap();
                 ;
             });
             return mappingConfig;   
