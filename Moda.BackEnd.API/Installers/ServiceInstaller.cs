@@ -25,7 +25,6 @@ namespace Moda.BackEnd.API.Installers
             services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddScoped<IShopService, ShopService>();
             services.AddScoped<IRatingService, RatingService>();
-            services.AddScoped<ICartService, CartService>();
         }
     }
 }
