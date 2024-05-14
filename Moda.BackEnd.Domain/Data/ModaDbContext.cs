@@ -37,8 +37,7 @@ namespace Moda.BackEnd.Domain.Data
         public DbSet<StockHistory> StockHistories { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
-        public DbSet<Cart> Carts { get; set; }  
-        public DbSet<CartDetail> CartDetails { get; set; }  
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<IdentityRole>().HasData(new IdentityRole
