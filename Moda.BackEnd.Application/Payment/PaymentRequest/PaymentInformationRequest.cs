@@ -8,7 +8,7 @@ namespace Moda.BackEnd.Application.Payment.PaymentRequest
 {
     public class PaymentInformationRequest
     {
-        public string OrderID { get; set; } = null!;
+        public string OrderID { get; set; }
         public string AccountID { get; set; } = null!;  
         public string CustomerName { get; set; } = null!;   
         public double Amount { get; set; }

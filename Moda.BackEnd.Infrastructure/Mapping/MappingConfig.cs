@@ -49,12 +49,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
 
                 config.CreateMap<ProductStock, ProductStock>()
                 .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
-                .ForMember(desc => desc.ClothingSize, act => act.MapFrom(src => src.ClothingSize))
-                .ForMember(desc => desc.ShoeSize, act => act.MapFrom(src => src.ShoeSize))
                 .ForMember(desc => desc.Quantity, act => act.MapFrom(src => src.Quantity))
-                .ForMember(desc => desc.Price, act => act.MapFrom(src => src.Price))
-                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
-                .ForMember(desc => desc.WarehouseId, act => act.MapFrom(src => src.WarehouseId))
                 ;
 
 

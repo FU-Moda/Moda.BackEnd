@@ -274,50 +274,6 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.Cart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<double>("Total")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("Carts");
-                });
-
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.CartDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CartId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("CartDetails");
-                });
-
             modelBuilder.Entity("Moda.BackEnd.Domain.Models.Coupon", b =>
                 {
                     b.Property<Guid>("Id")
@@ -450,6 +406,31 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.PaymentResponse", b =>
+                {
+                    b.Property<Guid>("PaymentResponseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Amount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OrderInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PaymentResponseId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("PaymentResponses");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Product", b =>
@@ -747,36 +728,6 @@ namespace Moda.BackEnd.Domain.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.Cart", b =>
-                {
-                    b.HasOne("Moda.BackEnd.Domain.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.CartDetail", b =>
-                {
-                    b.HasOne("Moda.BackEnd.Domain.Models.Cart", "Cart")
-                        .WithMany()
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Moda.Backend.Domain.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cart");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("Moda.Backend.Domain.Models.Order", b =>
                 {
                     b.HasOne("Moda.BackEnd.Domain.Models.Account", "Account")
@@ -827,6 +778,17 @@ namespace Moda.BackEnd.Domain.Migrations
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Payment", b =>
+                {
+                    b.HasOne("Moda.Backend.Domain.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.PaymentResponse", b =>
                 {
                     b.HasOne("Moda.Backend.Domain.Models.Order", "Order")
                         .WithMany()

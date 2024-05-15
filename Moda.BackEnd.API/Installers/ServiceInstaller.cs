@@ -2,6 +2,7 @@
 using Moda.BackEnd.Application;
 using Moda.BackEnd.Application.IRepositories;
 using Moda.BackEnd.Application.IServices;
+using Moda.BackEnd.Application.Payment.PaymentService;
 using Moda.BackEnd.Application.Services;
 using Moda.BackEnd.Domain.Data;
 using Moda.BackEnd.Infrastructure.Repositories;
@@ -26,6 +27,8 @@ namespace Moda.BackEnd.API.Installers
             services.AddScoped<IShopService, ShopService>();
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<ICouponService, CouponService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
 
         }
     }

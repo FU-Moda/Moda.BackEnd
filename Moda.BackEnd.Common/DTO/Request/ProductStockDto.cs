@@ -12,11 +12,6 @@ namespace Moda.BackEnd.Common.DTO.Request
     public class ProductStockDto
     {
         public Guid Id { get; set; }    
-        public Size.ClothingSize? ClothingSize { get; set; }
-        public Size.ShoeSize? ShoeSize { get; set; }
         public int Quantity { get; set; }
-        public double Price { get; set; }
-        public Guid ProductId { get; set; }
-        public Guid WarehouseId { get; set; }
     }
 }

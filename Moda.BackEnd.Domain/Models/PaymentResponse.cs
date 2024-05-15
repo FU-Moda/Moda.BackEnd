@@ -13,7 +13,7 @@ namespace Moda.BackEnd.Domain.Models
     {
         [Key]
         public Guid PaymentResponseId { get; set; }
-        public string OrderId { get; set; } = null!;
+        public Guid OrderId { get; set; }
         [ForeignKey("OrderId")] 
         public Order Order { get; set; } = null!;
         public string? Amount { get; set; }

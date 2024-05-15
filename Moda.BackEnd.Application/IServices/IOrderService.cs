@@ -1,5 +1,7 @@
-﻿using Moda.BackEnd.Common.DTO.Request;
+﻿using Microsoft.AspNetCore.Http;
+using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
+using Moda.BackEnd.Domain.Enum;
 using Moda.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -11,9 +13,9 @@ namespace Moda.BackEnd.Application.IServices
 {
     public interface IOrderService
     {
-        Task<AppActionResult> CreateOrderWithPayment(int quantity, string accountId, List<ProductStockDto> productStockDtos);
+        Task<AppActionResult> CreateOrderWithPayment( OrderRequest orderRequest, HttpContext context);
         Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize);
         Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber, int pageSize);
-        Task<AppActionResult> UpdateStatus(string orderId, int status);
+        Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus);
     }
 }
