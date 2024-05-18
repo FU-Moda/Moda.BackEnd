@@ -24,8 +24,8 @@ namespace Moda.BackEnd.Application.Services
         public OrderService(IServiceProvider serviceProvider, IUnitOfWork unitOfWork, IRepository<Order> orderRepository, IRepository<OrderDetail> orderDetailRepository) : base(serviceProvider)
         {
             _unitOfWork = unitOfWork;
-            _orderDetailRepository = orderDetailRepository; 
-            _orderRepository = orderRepository;  
+            _orderDetailRepository = orderDetailRepository;
+            _orderRepository = orderRepository;
         }
 
         public async Task<AppActionResult> CreateOrderWithPayment(OrderRequest orderRequest, HttpContext context)
@@ -49,32 +49,32 @@ namespace Moda.BackEnd.Application.Services
                     OrderTime = DateTime.Now,
                     PhoneNumber = accountDb!.PhoneNumber!,
                     Status = Domain.Enum.OrderStatus.PENDING,
-                    DeliveryCost = 0,   
+                    DeliveryCost = 0,
                     Total = 0
                 };
 
                 double total = 0;
 
-                foreach (var item in  orderRequest.ProductStockDtos)
+                foreach (var item in orderRequest.ProductStockDtos)
                 {
                     var productStock = await productStockRepository!.GetByExpression(p => p!.Id == item.Id && p.Quantity >= item.Quantity, p => p.Product!);
                     if (productStock == null)
                     {
                         result = BuildAppActionResultError(result, $"Hàng với Id {item.Id} không tồn tại hoặc sản phẩm không đủ số lượng");
-                        return result;  
+                        return result;
                     }
                     var orderDetail = new OrderDetail
                     {
-                        Id = Guid.NewGuid() ,   
+                        Id = Guid.NewGuid(),
                         ProductStockId = item.Id,
-                        Quantity = item.Quantity,   
+                        Quantity = item.Quantity,
                         OrderId = order.Id,
                     };
                     productStock.Quantity -= item.Quantity;
                     await productStockRepository.Update(productStock);
 
                     total += productStock.Price * item.Quantity;
-                    await _orderDetailRepository.Insert(orderDetail);   
+                    await _orderDetailRepository.Insert(orderDetail);
                 }
                 order.Total = total;
                 if (order.Total > 250000)
@@ -85,15 +85,15 @@ namespace Moda.BackEnd.Application.Services
                 {
                     order.DeliveryCost = 30000;
                 }
-                await _orderRepository.Insert(order);   
+                await _orderRepository.Insert(order);
                 await _unitOfWork.SaveChangesAsync();
 
                 var payment = new PaymentInformationRequest
                 {
                     AccountID = order.AccountId,
-                    Amount = (double)order.Total,   
+                    Amount = (double)order.Total,
                     CustomerName = $"{order.Account!.FirstName} {order.Account.LastName}",
-                    OrderID = order.Id.ToString(),  
+                    OrderID = order.Id.ToString(),
                 };
                 result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
             }
@@ -101,7 +101,7 @@ namespace Moda.BackEnd.Application.Services
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-            return result;  
+            return result;
         }
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
@@ -127,9 +127,9 @@ namespace Moda.BackEnd.Application.Services
                 var accountDb = await accountRepository!.GetByExpression(p => p.Id == accountId);
                 if (accountDb == null)
                 {
-                    result = BuildAppActionResultError(result , $"Tài khoản với {accountId} không tồn tại");
+                    result = BuildAppActionResultError(result, $"Tài khoản với {accountId} không tồn tại");
                 }
-                result.Result  = await _orderDetailRepository.GetAllDataByExpression(p => p.Order.AccountId == accountId, pageNumber, pageSize, null, false, p => p.Order!);
+                result.Result = await _orderDetailRepository.GetAllDataByExpression(p => p.Order.AccountId == accountId, pageNumber, pageSize, null, false, p => p.Order!);
             }
             catch (Exception ex)
             {
@@ -143,19 +143,40 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
+                //var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!, p => p.ProductStock!.Product!.Shop!, p => p.Order!.Account!);
+
+                //var groupedOrderDetails = orderDetailDb!.Items!
+                //.GroupBy(od => od.OrderId)
+                //.w(g => new OrderResponse
+                //{
+                //    Order = g.Key,
+                //    OrderDetails = g.ToList()
+                //})
+                //.ToList();
+
+                //// Assign grouped list to the result
+                //result.Result = new PagedResult<OrderResponse>
+                //{
+                //    Items = groupedOrderDetails,
+                //    TotalPages = orderDetailDb.TotalPages,  
+                //};
+                var list = new List<OrderResponse>();
                 var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!, p => p.ProductStock!.Product!.Shop!, p => p.Order!.Account!);
-                var groupedOrderDetails = orderDetailDb!.Items!
-            .GroupBy(od => od.OrderId)
-            .Select(g => new GroupedOrderDetails
-            {
-                OrderId = g.Key,
-                OrderDetails = g.ToList()
-            })
-            .ToList();
-
-                // Assign grouped list to the result
-                result.Result = groupedOrderDetails;
-
+                 var orderResponse =  orderDetailDb!.Items!.Select(a => a.Order);
+                foreach (var item in orderResponse)
+                {
+                    var details = await _orderDetailRepository.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!, p => p.ProductStock!.Product!.Shop!, p => p.Order!.Account!);
+                    list.Add(new OrderResponse
+                    { 
+                        
+                        Order = item!,
+                        OrderDetails = details!.Items!
+                    });
+                }
+                result.Result = new PagedResult<OrderResponse> { 
+                        Items = list,
+                        TotalPages = orderDetailDb.TotalPages,  
+                };
             }
             catch (Exception ex)
             {
@@ -191,9 +212,9 @@ namespace Moda.BackEnd.Application.Services
                 else
                 {
                     orderDb.Status = orderStatus;
-                    await _unitOfWork.SaveChangesAsync();   
+                    await _unitOfWork.SaveChangesAsync();
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -201,6 +222,6 @@ namespace Moda.BackEnd.Application.Services
             }
             return result;
         }
-       
+
     }
 }

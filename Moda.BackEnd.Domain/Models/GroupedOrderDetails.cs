@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Moda.BackEnd.Domain.Models
 {
-    public class GroupedOrderDetails
+    public class OrderResponse
     {
-        public Guid OrderId { get; set; }
+        public Order Order { get; set; } = null!;
         public List<OrderDetail> OrderDetails { get; set; } = null!;
     }
 }
