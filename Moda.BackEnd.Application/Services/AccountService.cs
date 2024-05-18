@@ -216,9 +216,26 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                var account = await _accountRepository.GetById(id);
+                var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                var roleRepository = Resolve<IRepository<IdentityRole>>();
+                AccountRoleResponse accountRoleResponse = new AccountRoleResponse();    
+                var account = await _accountRepository.GetByExpression(p => p!.Id == id);
+                var roleList = new List<IdentityRole>();
                 if (account == null) result = BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
-                if (!BuildAppActionResultIsError(result)) result.Result = account;
+
+                var userRoleDb = await userRoleRepository!.GetAllDataByExpression(p => p.UserId == account!.Id, 0, 0, null, false, null);
+                if (userRoleDb!.Items!.Count > 0 && userRoleDb.Items != null)
+                {
+                    foreach (var item in userRoleDb.Items)
+                    {
+                        var roleDb = await roleRepository!.GetByExpression(p => p!.Id == item.RoleId);
+                        roleList.Add(roleDb);
+                    }
+                }
+                accountRoleResponse.Account = account;
+                accountRoleResponse.IdentityRoles = roleList;   
+                if (!BuildAppActionResultIsError(result))
+                    result.Result = accountRoleResponse;
             }
             catch (Exception ex)
             {
