@@ -36,5 +36,11 @@ namespace Moda.BackEnd.API.Controllers
         {
             return await _service.AddShop(dto);
         }
+
+        [HttpGet("get-shop-by-accountId/{Id}")]
+        public async Task<AppActionResult> GetShopByAccountId(string Id)
+        {
+            return await _service.GetShopByAccountId(Id);
+        }
     }
 }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moda.BackEnd.Common.DTO.Request;
+using Moda.BackEnd.Domain.Models;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -31,6 +32,11 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
+                var existedShop = _repository.GetByExpression(p => p.AccountId == dto.AccountId);
+                if (existedShop != null)
+                {
+                    result = BuildAppActionResultError(result, "Shop này đã tồn tại");
+                }
                 var shop = _mapper.Map<Shop>( dto );
                 shop.Id = Guid.NewGuid();
                 await _repository.Insert(shop);
@@ -50,6 +56,26 @@ namespace Moda.BackEnd.Application.Services
             {
                 result.Result = await _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, s => s.Account);
             }catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async  Task<AppActionResult> GetShopByAccountId(string Id)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var accountRepository = Resolve<IRepository<Account>>();
+                var accountDb = await accountRepository!.GetByExpression(p => p.Id == Id);
+                if (accountDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Tài khoản này không tồn tại");
+                }
+                result.Result = await _repository.GetAllDataByExpression(p => p.AccountId == Id, 0, 0, null, false, null);
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
