@@ -23,6 +23,5 @@ namespace Moda.Backend.Domain.Models
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }    
         public DateTime OrderTime { get; set; } 
-
     }
 }
