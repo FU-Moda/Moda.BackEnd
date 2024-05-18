@@ -138,12 +138,24 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async  Task<AppActionResult> GetAllOrderByShopId(Guid shopId, int pageNumber, int pageSize)
+        public async Task<AppActionResult> GetAllOrderByShopId(Guid shopId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
-                result.Result = await _orderDetailRepository.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!, p => p.ProductStock!.Product!.Shop!, p => p.Order!.Account!);
+                var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!, p => p.ProductStock!.Product!.Shop!, p => p.Order!.Account!);
+                var groupedOrderDetails = orderDetailDb!.Items!
+            .GroupBy(od => od.OrderId)
+            .Select(g => new GroupedOrderDetails
+            {
+                OrderId = g.Key,
+                OrderDetails = g.ToList()
+            })
+            .ToList();
+
+                // Assign grouped list to the result
+                result.Result = groupedOrderDetails;
+
             }
             catch (Exception ex)
             {
