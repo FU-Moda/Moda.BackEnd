@@ -230,7 +230,7 @@ namespace Moda.BackEnd.Application.Services
                         var productResponse = new ProductResponse();
                         var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
-                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null || staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
                             productResponse.Product = item;
                             productResponse.StaticFile = staticFileDb.Items.ToList();
