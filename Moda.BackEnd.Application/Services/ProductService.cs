@@ -68,17 +68,19 @@ namespace Moda.BackEnd.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
-                    var upload = await firebaseService!.UploadFileToFirebase(productDto.File.Img, pathName);
-                    await staticFileRepository!.Insert(new StaticFile
+                    foreach (var file in productDto!.File!.Img)
                     {
-                        ProductId = productMapper.Id,
-                        Img = upload!.Result!.ToString()!,
-                    });
-                    await _unitOfWork.SaveChangesAsync();
+                        var upload = await firebaseService!.UploadFileToFirebase(file, pathName);
+                        await staticFileRepository!.Insert(new StaticFile
+                        {
+                            ProductId = productMapper.Id,
+                            Img = upload!.Result!.ToString()!,
+                        });
+                        await _unitOfWork.SaveChangesAsync();
 
-                    if (upload.IsSuccess && upload.Result != null)
-                        result.Messages.Add("Upload firebase successful");
-                    result.Messages.Add(SD.ResponseMessage.CREATE_SUCCESSFULLY);
+                        if (upload.IsSuccess && upload.Result != null)
+                            result.Messages.Add("Upload firebase successful");
+                    }
                 }
             }
             catch (Exception ex)
@@ -337,32 +339,36 @@ namespace Moda.BackEnd.Application.Services
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
 
-                var oldFile = await staticFileRepository!.GetByExpression(p => p!.ProductId == productDb!.Id);
-                if (oldFile == null)
+                var oldFiles = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == productDb!.Id, 0, 0, null, false,null);
+                if (oldFiles.Items == null)
                 {
                     result = BuildAppActionResultError(result, "File này không tồn tại");
                 }
 
-                var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb.Id}.jpg";
+                var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb!.Id}.jpg";
                 var imageResult = firebaseService!.DeleteFileFromFirebase(pathName);
                 if (imageResult != null)
                 {
                     result.Messages.Add("Delete image on firebase cloud successful");
                 }
 
-
-                var upload = await firebaseService.UploadFileToFirebase(productDto!.File!.Img, pathName);
-                if (upload.IsSuccess && upload.Result != null)
+                foreach (var item in productDto.File!.Img!)
                 {
-                    result.Messages.Add("Upload image on firebase cloud successful");
-                    oldFile.Img = upload.Result.ToString()!;
+                    foreach (var oldFile in oldFiles.Items!)
+                    {
+                        var upload = await firebaseService.UploadFileToFirebase(item, pathName);
+                        if (upload.IsSuccess && upload.Result != null)
+                        {
+                            result.Messages.Add("Upload image on firebase cloud successful");
+                            oldFile.Img = upload.Result.ToString()!;
+                        }
+
+                        _mapper.Map(productDto, productDb);
+                        await _productRepository.Update(productDb);
+                        await staticFileRepository.Update(oldFile);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                 }
-
-                _mapper.Map(productDto, productDb);
-                await _productRepository.Update(productDb);
-                await staticFileRepository.Update(oldFile);
-                await _unitOfWork.SaveChangesAsync();
-
             }
             catch (Exception ex)
             {

@@ -17,7 +17,7 @@ namespace Moda.BackEnd.Common.DTO.Request
         public ClothType ClothType { get; set; }
         public Gender Gender { get; set; }
         public Guid ShopId { get; set; }
-        public IEnumerable<Stock> ProductStocks { get; set; }   
+        public IEnumerable<Stock>? ProductStocks { get; set; }   
         public File? File { get; set; }       
     }
 
@@ -31,6 +31,6 @@ namespace Moda.BackEnd.Common.DTO.Request
     }
     public class File
     {
-        public IFormFile Img { get; set; } = null!;
+        public List<IFormFile> Img { get; set; } = null!;
     }
 }
