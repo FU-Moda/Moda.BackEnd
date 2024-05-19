@@ -290,13 +290,30 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> GetProductStockByProductId(Guid productId)
+        public async Task<AppActionResult> GetProductStockByProductId(Guid productId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
+                var list = new List<ProductStockResponse>();
                 var productStockRepository = Resolve<IRepository<ProductStock>>();
-                result.Result = await productStockRepository!.GetByExpression(p => p!.ProductId == productId, p => p.Product!);
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!, p => p.Warehouse!);
+                var product = productStockDb!.Items!.Select(a => a.Product);
+                foreach (var item in product)
+                {
+                    var details =  await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!, p => p.Warehouse!);
+                    list.Add(new ProductStockResponse
+                    {
+                        Product = item!,
+                        ProductStock = details.Items!
+                    }); 
+                }
+                result.Result = new PagedResult<ProductStockResponse> 
+                { 
+                    Items = list,
+                    TotalPages = productStockDb.TotalPages,
+                };
+
             }
             catch (Exception ex)
             {

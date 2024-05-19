@@ -41,9 +41,9 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-product-stock-by-product-id/{productId}")]
-        public async Task<AppActionResult> GetProductStockByProductId(Guid productId)
+        public async Task<AppActionResult> GetProductStockByProductId(Guid productId, int pageNumber = 1, int pageSize = 10)
         {
-            return await _productService.GetProductStockByProductId(productId);
+            return await _productService.GetProductStockByProductId(productId, pageNumber, pageSize);
         }
 
         [HttpPost("add-new-product")]
