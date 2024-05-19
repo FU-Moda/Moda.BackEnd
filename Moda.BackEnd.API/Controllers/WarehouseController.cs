@@ -15,7 +15,7 @@ namespace Moda.BackEnd.API.Controllers
             _warehouseService = warehouseService;   
         }
 
-        [HttpGet("get-all-warehouse")]
+        [HttpGet("get-all-warehouse/{pageNumber}/{pageSize}")]
         public async Task<AppActionResult> GetAllWarehouse(int pageNumber = 1, int pageSize = 10)
         {
             return await _warehouseService.GetAllWarehouse(pageNumber, pageSize);       
