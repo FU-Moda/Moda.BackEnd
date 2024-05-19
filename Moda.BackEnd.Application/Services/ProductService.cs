@@ -301,7 +301,7 @@ namespace Moda.BackEnd.Application.Services
                 var product = productStockDb!.Items!.Select(a => a.Product);
                 foreach (var item in product)
                 {
-                    var details =  await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!, p => p.Warehouse!);
+                    var details =  await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Warehouse!, p => p.Product!.Shop!);
                     list.Add(new ProductStockResponse
                     {
                         Product = item!,
