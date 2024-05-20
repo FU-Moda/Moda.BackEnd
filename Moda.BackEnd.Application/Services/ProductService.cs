@@ -32,7 +32,7 @@ namespace Moda.BackEnd.Application.Services
         public async Task<AppActionResult> AddNewProduct(ProductDto productDto)
         {
             var result = new AppActionResult();
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)) 
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
@@ -78,8 +78,8 @@ namespace Moda.BackEnd.Application.Services
                                 Img = upload!.Result!.ToString()!,
                             };
                             staticList.Add(staticImg);
-                               
-                            if(!upload.IsSuccess)
+
+                            if (!upload.IsSuccess)
                             {
                                 result = BuildAppActionResultError(result, "Upload failed");
                             }
@@ -310,8 +310,8 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 var productStockRepository = Resolve<IRepository<ProductStock>>();
-                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!, p => p.Warehouse!);
-                if (productStockDb!.Items!.Count> 0 && productStockDb.Items != null)
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!.Shop!, p => p.Warehouse!);
+                if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null)
                 {
                     // Assume the product details are the same for all product stock entries, so take the first one
                     var product = productStockDb.Items.First().Product;
@@ -334,54 +334,82 @@ namespace Moda.BackEnd.Application.Services
         public async Task<AppActionResult> UpdateProduct(ProductDto productDto)
         {
             var result = new AppActionResult();
-            try
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var firebaseService = Resolve<IFirebaseService>();
-                var staticFileRepository = Resolve<IRepository<StaticFile>>();
-                var productDetailRepository = Resolve<IRepository<ProductStock>>();
-
-                var productDb = await _productRepository.GetByExpression(p => p!.Name.Equals(productDto.Name) && p.ShopId == productDto.ShopId);
-                if (productDb == null)
+                try
                 {
-                    result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
-                }
-
-                var oldFiles = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == productDb!.Id, 0, 0, null, false,null);
-                if (oldFiles.Items == null)
-                {
-                    result = BuildAppActionResultError(result, "File này không tồn tại");
-                }
-
-                var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb!.Id}.jpg";
-                var imageResult = firebaseService!.DeleteFileFromFirebase(pathName);
-                if (imageResult != null)
-                {
-                    result.Messages.Add("Delete image on firebase cloud successful");
-                }
-
-                foreach (var item in productDto!.Img!)
-                {
-                    foreach (var oldFile in oldFiles.Items!)
+                    var firebaseService = Resolve<IFirebaseService>();
+                    var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                    var productDetailRepository = Resolve<IRepository<ProductStock>>();
+                    var productDb = await _productRepository.GetByExpression(p => p!.Name.Equals(productDto.Name) && p.ShopId == productDto.ShopId);
+                    if (productDb == null)
                     {
-                        var upload = await firebaseService.UploadFileToFirebase(item, pathName);
-                        if (upload.IsSuccess && upload.Result != null)
-                        {
-                            result.Messages.Add("Upload image on firebase cloud successful");
-                            oldFile.Img = upload.Result.ToString()!;
-                        }
+                        return BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
+                    }
 
+                    var oldFiles = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == productDb!.Id, 0, 0, null, false, null);
+                    if (oldFiles.Items == null || !oldFiles.Items.Any())
+                    {
+                        return BuildAppActionResultError(result, "File này không tồn tại");
+                    }
+
+                    var oldFileList = new List<StaticFile>();
+                    foreach (var oldImg in oldFiles.Items!)
+                    {
+                        oldFileList.Add(oldImg);
+                        var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb!.Id}.jpg";
+                        var imageResult = firebaseService!.DeleteFileFromFirebase(pathName);
+                        if (imageResult != null)
+                        {
+                            result.Messages.Add("Delete image on firebase cloud successful");
+                        }
+                    }
+
+                    // Debugging: Check if oldFileList has items
+                    if (!oldFileList.Any())
+                    {
+                        return BuildAppActionResultError(result, "No old files found to delete.");
+                    }
+
+                    // Attempt to delete old files
+                    await staticFileRepository.DeleteRange(oldFileList);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    List<StaticFile> staticList = new List<StaticFile>();
+                    foreach (var file in productDto!.Img)
+                    {
+                        var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productDb.Id}{Guid.NewGuid()}.jpg";
+                        var upload = await firebaseService!.UploadFileToFirebase(file, pathName);
+                        var staticImg = new StaticFile
+                        {
+                            Id = Guid.NewGuid(),
+                            ProductId = productDb.Id,
+                            Img = upload!.Result!.ToString()!,
+                        };
+                        staticList.Add(staticImg);
+
+                        if (!upload.IsSuccess)
+                        {
+                            return BuildAppActionResultError(result, "Upload failed");
+                        }
+                    }
+
+                    if (!BuildAppActionResultIsError(result))
+                    {
                         _mapper.Map(productDto, productDb);
-                        await _productRepository.Update(productDb);
-                        await staticFileRepository.Update(oldFile);
+                        await _productRepository.Update(productDb!);
+                        await staticFileRepository.InsertRange(staticList);
                         await _unitOfWork.SaveChangesAsync();
+                        scope.Complete();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
+                catch (Exception ex)
+                {
+                    return BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
+                }
             }
             return result;
         }
+
     }
 }
