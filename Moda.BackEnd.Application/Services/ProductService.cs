@@ -68,7 +68,7 @@ namespace Moda.BackEnd.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
-                    foreach (var file in productDto!.File!.Img)
+                    foreach (var file in productDto!.Img)
                     {
                         var upload = await firebaseService!.UploadFileToFirebase(file, pathName);
                         await staticFileRepository!.Insert(new StaticFile
@@ -297,25 +297,20 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                var list = new List<ProductStockResponse>();
                 var productStockRepository = Resolve<IRepository<ProductStock>>();
                 var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!, p => p.Warehouse!);
-                var product = productStockDb!.Items!.Select(a => a.Product);
-                foreach (var item in product)
+                if (productStockDb!.Items!.Count> 0 && productStockDb.Items != null)
                 {
-                    var details =  await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Warehouse!, p => p.Product!.Shop!);
-                    list.Add(new ProductStockResponse
-                    {
-                        Product = item!,
-                        ProductStock = details.Items!
-                    }); 
-                }
-                result.Result = new PagedResult<ProductStockResponse> 
-                { 
-                    Items = list,
-                    TotalPages = productStockDb.TotalPages,
-                };
+                    // Assume the product details are the same for all product stock entries, so take the first one
+                    var product = productStockDb.Items.First().Product;
 
+                    var productStockResponse = new ProductStockResponse
+                    {
+                        Product = product!,
+                        ProductStock = productStockDb.Items!
+                    };
+                    result.Result = productStockResponse;
+                }
             }
             catch (Exception ex)
             {
@@ -352,7 +347,7 @@ namespace Moda.BackEnd.Application.Services
                     result.Messages.Add("Delete image on firebase cloud successful");
                 }
 
-                foreach (var item in productDto.File!.Img!)
+                foreach (var item in productDto!.Img!)
                 {
                     foreach (var oldFile in oldFiles.Items!)
                     {
