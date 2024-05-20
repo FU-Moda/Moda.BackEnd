@@ -48,7 +48,7 @@ namespace Moda.BackEnd.Application.Services
                     {
                         Id = Guid.NewGuid(),
                         AccountId = accountDb!.Id,
-                        Address = accountDb!.Id,
+                        Address = accountDb!.Address!,
                         OrderTime = DateTime.Now,
                         PhoneNumber = accountDb!.PhoneNumber!,
                         Status = Domain.Enum.OrderStatus.PENDING,

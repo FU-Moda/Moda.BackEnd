@@ -22,12 +22,12 @@ namespace Moda.BackEnd.Application.Services
             IServiceProvider serviceProvider,
             IRepository<Coupon> couponRepository,
             IMapper mapper,
-            IUnitOfWork unitOfWork  
+            IUnitOfWork unitOfWork
             ) : base(serviceProvider)
         {
             _couponRepository = couponRepository;
             _mapper = mapper;
-            _unitOfWork = unitOfWork;   
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<AppActionResult> CreateCoupon(CouponDto couponDto)
@@ -38,14 +38,12 @@ namespace Moda.BackEnd.Application.Services
                 var coupon = await _couponRepository.GetByExpression(p => p!.Id == couponDto.Id);
                 if (coupon != null)
                 {
-                    result = BuildAppActionResultError(result , "Voucher này đã tồn tại");
+                    result = BuildAppActionResultError(result, "Voucher này đã tồn tại");
                 }
-                else
-                {
-                    var couponDb = _mapper.Map<Coupon>(couponDto);
-                    result.Result = await _couponRepository.Insert(couponDb);
-                }
-            } 
+                var couponDb = _mapper.Map<Coupon>(couponDto);
+                result.Result = await _couponRepository.Insert(couponDb);
+                await _unitOfWork.SaveChangesAsync();
+            }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
@@ -63,14 +61,14 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Voucher này không tồn tại");
                 }
-                await _couponRepository.DeleteById(couponId);   
-                await _unitOfWork.SaveChangesAsync(); 
+                await _couponRepository.DeleteById(couponId);
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-            return result ; 
+            return result;
         }
 
         public async Task<AppActionResult> GetAllCoupon(int pageNumber, int pageSize)
@@ -93,7 +91,8 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 result.Result = await _couponRepository.GetByExpression(p => p!.Id == couponId);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
