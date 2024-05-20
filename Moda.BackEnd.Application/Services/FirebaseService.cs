@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -85,7 +86,7 @@ namespace Moda.BackEnd.Application.Services
 
         public async Task<AppActionResult> UploadFileToFirebase(IFormFile file, string pathFileName)
         {
-            var _result = new AppActionResult();
+                var _result = new AppActionResult();
             bool isValid = true;
             if (file == null || file.Length == 0)
             {
@@ -94,10 +95,7 @@ namespace Moda.BackEnd.Application.Services
             }
             if (isValid)
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await file.CopyToAsync(memoryStream);
-                    var stream = new MemoryStream(memoryStream.ToArray());
+                    var stream = file!.OpenReadStream();
                     var auth = new FirebaseAuthProvider(new FirebaseConfig(_firebaseConfiguration.ApiKey));
                     var account = await auth.SignInWithEmailAndPasswordAsync(_firebaseConfiguration.AuthEmail, _firebaseConfiguration.AuthPassword);
                     string destinationPath = $"{pathFileName}";
@@ -122,7 +120,6 @@ namespace Moda.BackEnd.Application.Services
                         _result.IsSuccess = false;
                         _result.Messages.Add("Upload failed");
                     }
-                }
             }
             return _result;
         }

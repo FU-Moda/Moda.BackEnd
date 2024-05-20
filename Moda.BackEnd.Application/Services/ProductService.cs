@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -31,61 +32,72 @@ namespace Moda.BackEnd.Application.Services
         public async Task<AppActionResult> AddNewProduct(ProductDto productDto)
         {
             var result = new AppActionResult();
-            try
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)) 
             {
-                var firebaseService = Resolve<IFirebaseService>();
-                var staticFileRepository = Resolve<IRepository<StaticFile>>();
-                var productStocksRepository = Resolve<IRepository<ProductStock>>();
-
-                var productIsExist = await _productRepository.GetByExpression(p => p!.Name == productDto.Name);
-                if (productIsExist != null)
+                try
                 {
-                    result = BuildAppActionResultError(result, "Loại sản phẩm này đã tồn tại");
+                    var firebaseService = Resolve<IFirebaseService>();
+                    var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                    var productStocksRepository = Resolve<IRepository<ProductStock>>();
+
+                    var productIsExist = await _productRepository.GetByExpression(p => p!.Name == productDto.Name);
+                    if (productIsExist != null)
+                    {
+                        result = BuildAppActionResultError(result, "Loại sản phẩm này đã tồn tại");
+                    }
+                    else
+                    {
+                        var productMapper = _mapper.Map<Product>(productDto);
+                        productMapper.Id = Guid.NewGuid();
+
+                        var productStockList = new List<ProductStock>();
+                        foreach (var item in productDto!.ProductStocks!)
+                        {
+                            productStockList.Add(new ProductStock
+                            {
+                                Id = Guid.NewGuid(),
+                                ProductId = productMapper.Id,
+                                Quantity = item.Quantity,
+                                ClothingSize = item.ClothingSize,
+                                ShoeSize = item.ShoeSize,
+                                WarehouseId = item.WarehouseId,
+                                Price = item.Price,
+                            });
+                        }
+
+                        ;
+                        List<StaticFile> staticList = new List<StaticFile>();
+                        foreach (var file in productDto!.Img)
+                        {
+                            var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}{Guid.NewGuid()}.jpg";
+                            var upload = await firebaseService!.UploadFileToFirebase(file, pathName);
+                            var staticImg = new StaticFile
+                            {
+                                Id = Guid.NewGuid(),
+                                ProductId = productMapper.Id,
+                                Img = upload!.Result!.ToString()!,
+                            };
+                            staticList.Add(staticImg);
+                               
+                            if(!upload.IsSuccess)
+                            {
+                                result = BuildAppActionResultError(result, "Upload failed");
+                            }
+                        }
+                        if (!BuildAppActionResultIsError(result))
+                        {
+                            await _productRepository.Insert(productMapper);
+                            await productStocksRepository!.InsertRange(productStockList);
+                            await staticFileRepository!.InsertRange(staticList);
+                            await _unitOfWork.SaveChangesAsync();
+                            scope.Complete();
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    var productMapper = _mapper.Map<Product>(productDto);
-                    productMapper.Id = Guid.NewGuid();
-                    await _productRepository.Insert(productMapper);
-                    await _unitOfWork.SaveChangesAsync();
-
-                    var productStockList = new List<ProductStock>();
-                    foreach (var item in productDto!.ProductStocks!)
-                    {
-                        productStockList.Add(new ProductStock
-                        {
-                            Id = Guid.NewGuid(),
-                            ProductId = productMapper.Id,
-                            Quantity = item.Quantity,
-                            ClothingSize = item.ClothingSize,
-                            ShoeSize = item.ShoeSize,
-                            WarehouseId = item.WarehouseId,
-                            Price = item.Price,
-                        });
-                    }
-
-                    await productStocksRepository!.InsertRange(productStockList);
-                    await _unitOfWork.SaveChangesAsync();
-
-                    var pathName = SD.FirebasePathName.PRODUCT_PREFIX + $"{productMapper.Id}.jpg";
-                    foreach (var file in productDto!.Img)
-                    {
-                        var upload = await firebaseService!.UploadFileToFirebase(file, pathName);
-                        await staticFileRepository!.Insert(new StaticFile
-                        {
-                            ProductId = productMapper.Id,
-                            Img = upload!.Result!.ToString()!,
-                        });
-                        await _unitOfWork.SaveChangesAsync();
-
-                        if (upload.IsSuccess && upload.Result != null)
-                            result.Messages.Add("Upload firebase successful");
-                    }
+                    result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
                 }
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
             }
             return result;
         }
