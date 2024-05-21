@@ -525,6 +525,7 @@ namespace Moda.BackEnd.Application.Services
                     account!.FirstName = accountRequest.FirstName;
                     account.LastName = accountRequest.LastName;
                     account.PhoneNumber = accountRequest.PhoneNumber;
+                    account.Address = accountRequest.Address;
                     result.Result = await _accountRepository.Update(account);
                 }
 
