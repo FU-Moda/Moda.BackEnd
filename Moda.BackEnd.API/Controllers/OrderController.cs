@@ -24,7 +24,11 @@ namespace Moda.BackEnd.API.Controllers
         {
            return await _orderService.CreateOrderWithPayment(orderRequest, HttpContext);     
         }
-
+        [HttpPost("create-order-cod")]
+        public async Task<AppActionResult> CreateOrderCOD(OrderRequest orderRequest) 
+        {
+            return await _orderService.CreateOrderCOD(orderRequest);
+        }
         [HttpGet("VNPayIpn")]
         public async Task<IActionResult> VNPayIPN()
         {

@@ -93,6 +93,7 @@ namespace Moda.BackEnd.Application.Services
                         await _orderRepository.Insert(order);
                         await _unitOfWork.SaveChangesAsync();
                         scope.Complete();
+                        result.Messages.Add("Tạo Order thành công");
                     }
                 }
                 catch (Exception ex)

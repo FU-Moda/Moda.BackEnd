@@ -10,6 +10,6 @@ namespace Moda.BackEnd.Common.DTO.Request
     public class ProductFilter
     {
         public ClothType ClothType { get; set; }    
-        public Gender Gender { get; set; }      
+        public Gender? Gender { get; set; }      
     }
 }
