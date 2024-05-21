@@ -13,7 +13,7 @@ namespace Moda.BackEnd.Application.IServices
     {
         Task<AppActionResult> GetAllProduct(int pageNumber, int pageSize);
         Task<AppActionResult> AddNewProduct(ProductDto productDto);
-        Task<AppActionResult> UpdateProduct(ProductDto productDto);   
+        Task<AppActionResult> UpdateProduct(UpdateProductDto productDto);   
         Task<AppActionResult> DeleteProduct(Guid productId);
         Task<AppActionResult> GetProductById(Guid productId);
         Task<AppActionResult> GetProductByShopId(Guid shopId, int pageNumber, int pageSize);

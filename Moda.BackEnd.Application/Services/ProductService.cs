@@ -5,6 +5,7 @@ using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
 using Moda.BackEnd.Common.Utils;
+using Moda.BackEnd.Domain.Enum;
 using Moda.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -331,7 +332,7 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> UpdateProduct(ProductDto productDto)
+        public async Task<AppActionResult> UpdateProduct(UpdateProductDto productDto)
         {
             var result = new AppActionResult();
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -346,6 +347,8 @@ namespace Moda.BackEnd.Application.Services
                     {
                         return BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                     }
+
+                    
 
                     var oldFiles = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == productDb!.Id, 0, 0, null, false, null);
                     if (oldFiles.Items == null || !oldFiles.Items.Any())
@@ -394,12 +397,30 @@ namespace Moda.BackEnd.Application.Services
                         }
                     }
 
+                    var productStock = await productDetailRepository!.GetAllDataByExpression(p => p.ProductId == productDto.Id, 0, 0, null, false, null);
+                    if (productStock.Items != null && productStock.Items.Count > 0)
+                    {
+                        foreach (var updateStock in productDto.ProductStocks!)
+                        {
+                            var stockItem = productStock.Items.FirstOrDefault(s => s.ClothingSize == updateStock.ClothingSize || s.ShoeSize == updateStock.ShoeSize);
+                            if (stockItem != null)
+                            {
+                                stockItem.ClothingSize = updateStock.ClothingSize;
+                                stockItem.ShoeSize = updateStock.ShoeSize;
+                                stockItem.Quantity = updateStock.Quantity;
+                                stockItem.Price = updateStock.Price;
+                                await productDetailRepository.Update(stockItem);
+                            }
+                        }
+                    }
+
                     if (!BuildAppActionResultIsError(result))
                     {
                         _mapper.Map(productDto, productDb);
                         await _productRepository.Update(productDb!);
                         await staticFileRepository.InsertRange(staticList);
                         await _unitOfWork.SaveChangesAsync();
+                        result.Messages.Add("Update sản phẩm thành công");
                         scope.Complete();
                     }
                 }
