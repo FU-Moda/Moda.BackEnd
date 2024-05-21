@@ -14,6 +14,8 @@ namespace Moda.BackEnd.Application.IServices
     public interface IOrderService
     {
         Task<AppActionResult> CreateOrderWithPayment( OrderRequest orderRequest, HttpContext context);
+        Task<AppActionResult> CreateOrderCOD( OrderRequest orderRequest);
+        Task<AppActionResult> UpdatesSucessStatus(Guid orderId);
         Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize);
         Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber, int pageSize);
         Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus);
