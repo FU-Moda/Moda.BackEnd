@@ -18,6 +18,7 @@ namespace Moda.BackEnd.Application.IServices
         Task<AppActionResult> UpdatesSucessStatus(Guid orderId);
         Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize);
         Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber, int pageSize);
+        Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber, int pageSize);
         Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus);
         Task<AppActionResult> GetAllOrderByShopId(Guid shopId, int pageNumber, int pageSize);
         Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId);
