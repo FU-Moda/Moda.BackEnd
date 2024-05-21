@@ -129,7 +129,10 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, $"Tài khoản với {accountId} không tồn tại");
                 }
-                result.Result = await _orderDetailRepository.GetAllDataByExpression(p => p.Order.AccountId == accountId, pageNumber, pageSize, null, false, p => p.Order!);
+                if (!BuildAppActionResultIsError(result))
+                {
+                    result.Result = await _orderRepository.GetAllDataByExpression(p => p.AccountId == accountId, pageNumber, pageSize, null, false, null);
+                }
             }
             catch (Exception ex)
             {
@@ -177,6 +180,32 @@ namespace Moda.BackEnd.Application.Services
                         Items = list,
                         TotalPages = orderDetailDb.TotalPages,  
                 };
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var orderDb = await _orderRepository!.GetByExpression(p => p.Id == orderId);
+                if (orderDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Đơn hàng với {orderDb} không tồn tại");
+                }
+                if (!BuildAppActionResultIsError(result))
+                {
+                    var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.OrderId == orderId, pageNumber, pageSize, null, false, p => p.ProductStock.Product);
+                    OrderListResponse data = new OrderListResponse();
+                    data.Order = orderDb!;
+                    data.OrderDetails = orderDetailDb.Items!;
+                    result.Result = data;
+                }
             }
             catch (Exception ex)
             {

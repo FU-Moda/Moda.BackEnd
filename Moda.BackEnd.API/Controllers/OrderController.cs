@@ -36,6 +36,12 @@ namespace Moda.BackEnd.API.Controllers
             return await _orderService.GetAllOrderByAccountId(accountId, pageNumber, pageSize);
         }
 
+        [HttpGet("get-all-order-detail-by-order-id/{orderId}/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderDetailByOrderId(orderId, pageNumber, pageSize);
+        }
+
         [HttpPut("update-status")]
         public async Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus)
         {
