@@ -45,6 +45,18 @@ namespace Moda.BackEnd.Application.Services
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequest.AccountId} không tồn tại");
                     }
+                    if (string.IsNullOrEmpty(accountDb!.Address))
+                    {
+                        result = BuildAppActionResultError(result, "Địa chỉ của tài khoản không được để trống");
+                        return result;
+                    }
+
+                    if (string.IsNullOrEmpty(accountDb!.PhoneNumber))
+                    {
+                        result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
+                        return result;
+                    }
+
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -118,6 +130,17 @@ namespace Moda.BackEnd.Application.Services
                     if (accountDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequest.AccountId} không tồn tại");
+                    }
+                    if (string.IsNullOrEmpty(accountDb!.Address))
+                    {
+                        result = BuildAppActionResultError(result, "Địa chỉ của tài khoản không được để trống");
+                        return result;
+                    }
+
+                    if (string.IsNullOrEmpty(accountDb!.PhoneNumber))
+                    {
+                        result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
+                        return result;
                     }
                     var order = new Order
                     {
