@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity;
 using Org.BouncyCastle.Bcpg;
 using Moda.BackEnd.Common.Utils;
 using System.Net.Http.Headers;
+using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -57,111 +59,49 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
-                //if (timePeriod > 3)
-                //{
-                //    if (ShopId != null)
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.Year == timePeriod && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                            
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    } 
-                //    else
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.Year == timePeriod, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if(orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //} else if (timePeriod == 0)
-                //{
-                //    if (ShopId != null)
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddDays(7) >= DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //    else
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddDays(7) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //}
-                //else if (timePeriod == 1)
-                //{
-                //    if (ShopId != null)
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(1) >= DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //    else
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(1) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //}
-                //else if (timePeriod == 2)
-                //{
-                //    if (ShopId != null)
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && o.Order.OrderTime.AddMonths(6) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //    else
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(6) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //}
-                //else 
-                //{
-                //    if (ShopId != null)
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && o.Order.OrderTime.AddMonths(12) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse(productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //    else
-                //    {
-                //        var orderDetail = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(12) >= DateTime.UtcNow, 0, 0, null, false, o => o.ProductStock.Product);
-                //        if (orderDetail.Items != null && orderDetail.Items.Count > 0)
-                //        {
-                //            var productRevenue = orderDetail.Items.GroupBy(s => s.ProductStock.ProductId).ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
-                //            result.Result = GetProductReportResponse((Dictionary<Guid, double>)productRevenue.OrderByDescending(k => k.Value).Take(10).ToDictionary(k => k.Key, k => k.Value));
-                //        }
-                //    }
-                //}
+                Expression<Func<OrderDetail, bool>> predicate = null;
+                DateTime comparisonDate = DateTime.UtcNow;
+
+                if (timePeriod > 3)
+                {
+                    predicate = o => o.Order.OrderTime.Year == timePeriod && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                }
+                else if (timePeriod == 0)
+                {
+                    comparisonDate = DateTime.Now.AddDays(-7);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                }
+                else if (timePeriod == 1)
+                {
+                    comparisonDate = DateTime.Now.AddMonths(-1);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                }
+                else if (timePeriod == 2)
+                {
+                    comparisonDate = DateTime.UtcNow.AddMonths(-6);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                }
+                else
+                {
+                    comparisonDate = DateTime.UtcNow.AddMonths(-12);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                }
+
+                var orderDetail = await _orderDetailRepository.GetAllDataByExpression(predicate, 0, 0, null, false, o => o.ProductStock.Product);
+
+                if (orderDetail.Items != null && orderDetail.Items.Count > 0)
+                {
+                    var productRevenue = orderDetail.Items
+                        .GroupBy(s => s.ProductStock.ProductId)
+                        .ToDictionary(s => s.Key, s => s.Sum(s => s.Quantity * s.ProductStock.Price));
+
+                    var topProducts = productRevenue
+                        .OrderByDescending(k => k.Value)
+                        .Take(10)
+                        .ToDictionary(k => k.Key, k => k.Value);
+
+                    result.Result = await GetProductReportResponse(topProducts);
+                }
             }
             catch (Exception ex)
             {
@@ -173,14 +113,13 @@ namespace Moda.BackEnd.Application.Services
         public async Task<ProductReportResponse> GetProductReportResponse(Dictionary<Guid, double> products)
         {
             ProductReportResponse data = new ProductReportResponse();
-            if(products.Count > 0)
+            if (products.Count > 0)
             {
                 List<Tag> tags = new List<Tag>();
-                foreach(var kvp in products)
+                foreach (var kvp in products)
                 {
-                    
                     var productDb = await _productRepository.GetById(kvp.Key);
-                    if(productDb != null)
+                    if (productDb != null)
                     {
                         data.productReports.Add(new ProductReport
                         {
@@ -195,6 +134,8 @@ namespace Moda.BackEnd.Application.Services
             }
             return data;
         }
+
+
 
         public async Task<AppActionResult> GetRevenueReport(int timePeriod, Guid? ShopId = null)
         {
@@ -212,14 +153,14 @@ namespace Moda.BackEnd.Application.Services
                         if(orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.Year == timePeriod).ToList());
+                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.Year == timePeriod).ToList(), timePeriod);
                         }
                     } else
                     {
                         orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.Year == timePeriod, 0, 0, null, false, null);
                         if(orderDb.Items != null && orderDb.Items.Count > 0)
                         {
-                            result.Result = GetRevenueResponse(orderDb.Items!);
+                            result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
                         }
                     }
                 } else if(timePeriod == 0 )
@@ -230,7 +171,7 @@ namespace Moda.BackEnd.Application.Services
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddDays(7) >= DateTime.UtcNow).ToList());
+                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddDays(7) >= DateTime.UtcNow).ToList(), timePeriod);
                         }
                     }
                     else
@@ -238,7 +179,7 @@ namespace Moda.BackEnd.Application.Services
                         orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.AddDays(7) >= DateTime.UtcNow, 0, 0, null, false, null);
                         if (orderDb.Items != null && orderDb.Items.Count > 0)
                         {
-                            result.Result = GetRevenueResponse(orderDb.Items!);
+                            result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
                         }
                     }
                 }
@@ -250,7 +191,7 @@ namespace Moda.BackEnd.Application.Services
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(1) >= DateTime.UtcNow).ToList());
+                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(1) >= DateTime.UtcNow).ToList(), timePeriod);
                         }
                     }
                     else
@@ -258,7 +199,7 @@ namespace Moda.BackEnd.Application.Services
                         orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.AddMonths(1) >= DateTime.UtcNow, 0, 0, null, false, null);
                         if (orderDb.Items != null && orderDb.Items.Count > 0)
                         {
-                            result.Result = GetRevenueResponse(orderDb.Items!);
+                            result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
                         }
                     }
                 }
@@ -270,7 +211,7 @@ namespace Moda.BackEnd.Application.Services
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(6) >= DateTime.UtcNow).ToList());
+                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(6) >= DateTime.UtcNow).ToList(), timePeriod);
                         }
                     }
                     else
@@ -278,7 +219,7 @@ namespace Moda.BackEnd.Application.Services
                         orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.AddMonths(6) >= DateTime.UtcNow, 0, 0, null, false, null);
                         if (orderDb.Items != null && orderDb.Items.Count > 0)
                         {
-                            result.Result = GetRevenueResponse(orderDb.Items!);
+                            result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
                         }
                     }
                 } else
@@ -289,7 +230,7 @@ namespace Moda.BackEnd.Application.Services
                             if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                             {
                                 List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                                result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(12) >= DateTime.UtcNow).ToList());
+                                result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddMonths(12) >= DateTime.UtcNow).ToList(), timePeriod);
                             }
                         }
                         else
@@ -297,7 +238,7 @@ namespace Moda.BackEnd.Application.Services
                             orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.AddMonths(12) >= DateTime.UtcNow, 0, 0, null, false, null);
                             if (orderDb.Items != null && orderDb.Items.Count > 0)
                             {
-                                result.Result = GetRevenueResponse(orderDb.Items!);
+                                result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
                             }
                         }
                 }
@@ -309,7 +250,7 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public RevenueResponse GetRevenueResponse(List<Order> orders)
+        public RevenueResponse GetRevenueResponse(List<Order> orders, int timePeriod)
         {
             RevenueResponse data = new RevenueResponse();
             if(orders.Count > 0)
@@ -319,6 +260,14 @@ namespace Moda.BackEnd.Application.Services
                 data.MinOrderValue = orders.MinBy(o => o.Total)!.Total;
                 data.MaxOrderValue = orders.MaxBy(o => o.Total)!.Total;
                 data.AvarageOrderValue = orders.Average(s => s.Total);
+                if (timePeriod == 0)
+                    data.RevenueChange = orders.GroupBy(o => o.OrderTime)
+                                         .ToDictionary(g => g.Key.ToString("yyyy-MM-dd"), g => g.Sum(a => a.Total));
+                else if (timePeriod == 1)
+                    data.RevenueChange = orders.GroupBy(a => CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(a.OrderTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday))
+                            .ToDictionary(group => $"Week {group.Key}", g => g.Sum(a => a.Total));
+                else data.RevenueChange = orders.GroupBy(a => a.OrderTime.ToString("MMMM")).ToDictionary(group => group.Key, g => g.Sum(a => a.Total));
+
             }
             return data;
         }
@@ -472,6 +421,7 @@ namespace Moda.BackEnd.Application.Services
                         data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.AccountId).Count();
                     }
                 }
+                result.Result = data;
             } catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);

@@ -11,6 +11,7 @@ namespace Moda.BackEnd.Common.DTO.Request
         //// num of order, min max order value, revenue, order value/người, order count/ người
         public double Total { get; set; }
         public int NumOfOrder {  get; set; }
+        public Dictionary<string, double> RevenueChange { get; set; } = new Dictionary<string, double>();
         public double MinOrderValue { get; set; }
         public double MaxOrderValue { get; set; }
         public double AvarageOrderValue { get; set; }
