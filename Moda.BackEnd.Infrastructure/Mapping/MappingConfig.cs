@@ -37,6 +37,16 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                 .ForMember(desc => desc.ShopId, act => act.MapFrom(src => src.ShopId))
                 .ReverseMap();
 
+
+                config.CreateMap<Product, UpdateProductDto>()
+                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
+                .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+                .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
+                .ForMember(desc => desc.ClothType, act => act.MapFrom(src => src.ClothType))
+                .ForMember(desc => desc.Gender, act => act.MapFrom(src => src.Gender))
+                .ForMember(desc => desc.ShopId, act => act.MapFrom(src => src.ShopId))
+                .ReverseMap();
+
                 config.CreateMap<Coupon, CouponDto>()
                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
                .ForMember(desc => desc.Code, act => act.MapFrom(src => src.Code))

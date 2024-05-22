@@ -59,7 +59,7 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPut("update-product")]
-        public async Task<AppActionResult> UpdateProduct([FromForm]ProductDto productDto)
+        public async Task<AppActionResult> UpdateProduct([FromForm]UpdateProductDto productDto)
         {
             return await _productService.UpdateProduct(productDto);     
         }
