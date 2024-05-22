@@ -282,38 +282,33 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if(ShopId != null)
                     {
-                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.Year != timePeriod && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        data.totalCustomer = 0;
+                        data.newCustomer = 0;
                     }
                     else
                     {
-                        var toExcludeOrder = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.Year != timePeriod, 0, 0, null, false, null);
-                        string AdminId = (await _roleRepository.GetByExpression(u => u.NormalizedName.ToLower().Equals("admin")))!.Id;
-                        string staffId = (await _roleRepository.GetByExpression(u => u.NormalizedName.ToLower().Equals("staff")))!.Id;
-                        string customerId = (await _roleRepository.GetByExpression(u => u.NormalizedName.ToLower().Equals("customer")))!.Id;
-                        HashSet<string> accountIds = new HashSet<string>();
-                        var userRoleAccountDb = await _userRoleRepository.GetAllDataByExpression(u => u.RoleId == AdminId, 0, 0, null, false, null);
-                        data.totalAdmin = userRoleAccountDb.Items.Count();
-                        userRoleAccountDb.Items.ForEach(o => accountIds.Add(o.UserId));
-
-                        userRoleAccountDb = await _userRoleRepository.GetAllDataByExpression(u => u.RoleId == staffId && !accountIds.Contains(u.UserId), 0, 0, null, false, null);
-                        data.totalStaff = userRoleAccountDb.Items.Count();
-                        userRoleAccountDb.Items.ForEach(o => accountIds.Add(o.UserId));
-
-                        userRoleAccountDb = await _userRoleRepository.GetAllDataByExpression(u => u.RoleId == customerId && !accountIds.Contains(u.UserId), 0, 0, null, false, null);
-                        data.totalCustomer = userRoleAccountDb.Items.Count();
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.AccountId).Count();
+                        data.totalAdmin = 0;
+                        data.totalStaff = 0;
+                        data.totalCustomer = 0;
+                        data.newCustomer = 0;
                     }
                 } else if(timePeriod == 0)
                 {
                     if (ShopId != null)
                     {
                         var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddDays(7) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
+                        {
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                            data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
+                        else
+                        {
+                            data.newCustomer = 0;
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
                     }
                     else
                     {
@@ -340,9 +335,18 @@ namespace Moda.BackEnd.Application.Services
                     if (ShopId != null)
                     {
                         var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
+                        {
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                            data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
+                        else
+                        {
+                            data.newCustomer = 0;
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
                     }
                     else
                     {
@@ -369,9 +373,17 @@ namespace Moda.BackEnd.Application.Services
                     if (ShopId != null)
                     {
                         var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(6) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        if(toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
+                        {
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                            data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        } else
+                        {
+                            data.newCustomer = 0;
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
                     }
                     else
                     {
@@ -398,7 +410,18 @@ namespace Moda.BackEnd.Application.Services
                     if (ShopId != null)
                     {
                         var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddYears(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
-                        data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
+                        {
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                            data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
+                        else
+                        {
+                            data.newCustomer = 0;
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
+                        }
                     }
                     else
                     {
