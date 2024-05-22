@@ -261,7 +261,7 @@ namespace Moda.BackEnd.Application.Services
                 data.MaxOrderValue = orders.MaxBy(o => o.Total)!.Total;
                 data.AvarageOrderValue = orders.Average(s => s.Total);
                 if (timePeriod == 0)
-                    data.RevenueChange = orders.GroupBy(o => o.OrderTime)
+                    data.RevenueChange = orders.GroupBy(o => o.OrderTime.Date)
                                          .ToDictionary(g => g.Key.ToString("yyyy-MM-dd"), g => g.Sum(a => a.Total));
                 else if (timePeriod == 1)
                     data.RevenueChange = orders.GroupBy(a => CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(a.OrderTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday))
