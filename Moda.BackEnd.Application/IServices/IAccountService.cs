@@ -10,6 +10,7 @@ namespace Moda.BackEnd.Application.IServices
 {
     public interface IAccountService
     {
+        Task<AppActionResult> CreateShopAccount(SignUpShopRequestDto signUpShopRequestDto, bool isGoogle);
         Task<AppActionResult> Login(LoginRequestDto loginRequest);
 
         public Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode);

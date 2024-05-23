@@ -22,6 +22,12 @@ namespace Moda.BackEnd.API.Controllers
             return await _accountService.CreateAccount(request, false);
         }
 
+        [HttpPost("create-shop-account")]
+        public async Task<AppActionResult> CreateShopAccount(SignUpShopRequestDto request)
+        {
+            return await _accountService.CreateShopAccount(request, false);
+        }
+
         [HttpGet("get-all-account")]
         public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)
         {
