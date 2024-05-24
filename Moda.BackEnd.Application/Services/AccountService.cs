@@ -3,6 +3,7 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Identity;
+using Moda.Backend.Domain.Models;
 using Moda.BackEnd.Application.IRepositories;
 using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.ConfigurationModel;
@@ -17,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -157,6 +159,70 @@ namespace Moda.BackEnd.Application.Services
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateShopAccount(SignUpShopRequestDto signUpShopRequestDto, bool isGoogle)
+        {
+            var result = new AppActionResult();
+          
+                try
+                {
+                    if (await _accountRepository.GetByExpression(r => r!.UserName == signUpShopRequestDto.Email) != null)
+                        result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
+                    if (!BuildAppActionResultIsError(result))
+                    {
+                        var emailService = Resolve<IEmailService>();
+                        var verifyCode = string.Empty;
+                        if (!isGoogle) verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
+                        var user = new Account
+                        {
+                            Email = signUpShopRequestDto.Email,
+                            UserName = signUpShopRequestDto.Email,
+                            FirstName = signUpShopRequestDto.FirstName,
+                            LastName = signUpShopRequestDto.LastName,
+                            PhoneNumber = signUpShopRequestDto.PhoneNumber,
+                            Gender = signUpShopRequestDto.Gender,
+                            VerifyCode = verifyCode,
+                            IsVerified = isGoogle ? true : false
+                        };
+                        var resultCreateUser = await _userManager.CreateAsync(user, signUpShopRequestDto.Password);
+                        var shopRepository = Resolve<IRepository<Shop>>();
+                        var shop = new Shop
+                        {
+                            Id = Guid.NewGuid(),
+                            AccountId = user.Id,
+                            Address = signUpShopRequestDto.Address,
+                            Description = signUpShopRequestDto.Description,
+                            Name = signUpShopRequestDto.ShopName
+                        };
+                        var resultCreateShop = await shopRepository!.Insert(shop);
+                        if (resultCreateUser.Succeeded)
+                        {
+                            CreateAccountShopResponse createAccountShopResponse = new CreateAccountShopResponse();
+                            createAccountShopResponse.Account = user;
+                            createAccountShopResponse.Shop = shop;
+                            result.Result = createAccountShopResponse;
+                            result.Messages.Add("Tạo shop thành công");
+                            if (!isGoogle)
+                                emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                                    TemplateMappingHelper.GetTemplateOTPEmail(
+                                        TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+                                        user.FirstName));
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
+                        }
+                        var resultCreateRole = await _userManager.AddToRoleAsync(user, "SHOP");
+                        if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền shop không thành công");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result = BuildAppActionResultError(result, ex.Message);
+                }
             return result;
         }
 
