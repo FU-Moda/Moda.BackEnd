@@ -37,6 +37,11 @@ namespace Moda.BackEnd.Domain.Data
         public DbSet<StockHistory> StockHistories { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
+        public DbSet<OptionPackage> OptionPackages { get; set; }    
+        public DbSet<OptionPackageHistory> OptionPackageHistories { get; set; } 
+        public DbSet<Configuration> Configurations { get; set; }    
+        public DbSet<Affiliate> Affiliates { get; set; }    
+        public DbSet<ShopPackage> ShopPackages { get; set; }    
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
