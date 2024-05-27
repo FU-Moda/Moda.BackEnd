@@ -42,6 +42,7 @@ namespace Moda.BackEnd.Domain.Data
         public DbSet<Configuration> Configurations { get; set; }    
         public DbSet<Affiliate> Affiliates { get; set; }    
         public DbSet<ShopPackage> ShopPackages { get; set; }    
+        public DbSet<PaymentResponse> PaymentResponses { get; set; }        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -101,17 +102,17 @@ namespace Moda.BackEnd.Domain.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            IConfiguration config = new ConfigurationBuilder()
-                           .SetBasePath(Directory.GetCurrentDirectory())
-                           .AddJsonFile("appsettings.json", true, true)
-                           .Build();
-            string cs = config["ConnectionStrings:DB"];
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(cs);
-            }
-            //optionsBuilder.UseSqlServer(
-            //   "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
+            //IConfiguration config = new ConfigurationBuilder()
+            //               .SetBasePath(Directory.GetCurrentDirectory())
+            //               .AddJsonFile("appsettings.json", true, true)
+            //               .Build();
+            //string cs = config["ConnectionStrings:DB"];
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //    optionsBuilder.UseSqlServer(cs);
+            //}
+            optionsBuilder.UseSqlServer(
+               "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         }
     }
 }

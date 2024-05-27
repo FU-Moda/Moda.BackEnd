@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Moda.BackEnd.Domain.Migrations
 {
-    public partial class AddFieldToModels : Migration
+    public partial class AddNewTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -37,6 +37,7 @@ namespace Moda.BackEnd.Domain.Migrations
                     VerifyCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -57,6 +58,21 @@ namespace Moda.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Configurations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PreValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActiveValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActiveDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Configurations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Coupons",
                 columns: table => new
                 {
@@ -71,6 +87,20 @@ namespace Moda.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Coupons", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OptionPackages",
+                columns: table => new
+                {
+                    OptionPackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PackageName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OptionPackages", x => x.OptionPackageId);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,7 +147,7 @@ namespace Moda.BackEnd.Domain.Migrations
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,6 +281,47 @@ namespace Moda.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OptionPackageHistories",
+                columns: table => new
+                {
+                    OptionPackageHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PackagePrice = table.Column<double>(type: "float", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OptionPackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OptionPackageHistories", x => x.OptionPackageHistoryId);
+                    table.ForeignKey(
+                        name: "FK_OptionPackageHistories_OptionPackages_OptionPackageId",
+                        column: x => x.OptionPackageId,
+                        principalTable: "OptionPackages",
+                        principalColumn: "OptionPackageId",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Affiliates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Profit = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Affiliates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Affiliates_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderCoupons",
                 columns: table => new
                 {
@@ -269,6 +340,27 @@ namespace Moda.BackEnd.Domain.Migrations
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_OrderCoupons_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentResponses",
+                columns: table => new
+                {
+                    PaymentResponseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderInfo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Success = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentResponses", x => x.PaymentResponseId);
+                    table.ForeignKey(
+                        name: "FK_PaymentResponses_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
@@ -318,6 +410,31 @@ namespace Moda.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShopPackages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OptionPackageHistoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShopPackages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShopPackages_OptionPackageHistories_OptionPackageHistoryId",
+                        column: x => x.OptionPackageHistoryId,
+                        principalTable: "OptionPackageHistories",
+                        principalColumn: "OptionPackageHistoryId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_ShopPackages_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductStocks",
                 columns: table => new
                 {
@@ -325,6 +442,7 @@ namespace Moda.BackEnd.Domain.Migrations
                     ClothingSize = table.Column<int>(type: "int", nullable: true),
                     ShoeSize = table.Column<int>(type: "int", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -363,9 +481,9 @@ namespace Moda.BackEnd.Domain.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
-                        name: "FK_ProductTags_Products_TagId",
+                        name: "FK_ProductTags_Tags_TagId",
                         column: x => x.TagId,
-                        principalTable: "Products",
+                        principalTable: "Tags",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                 });
@@ -378,18 +496,26 @@ namespace Moda.BackEnd.Domain.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RatingPoint = table.Column<int>(type: "int", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreateBy = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UpdateBy = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Ratings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Ratings_AspNetUsers_AccountId",
-                        column: x => x.AccountId,
+                        name: "FK_Ratings_AspNetUsers_CreateBy",
+                        column: x => x.CreateBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Ratings_AspNetUsers_UpdateBy",
+                        column: x => x.UpdateBy,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Ratings_Products_ProductId",
                         column: x => x.ProductId,
@@ -469,6 +595,22 @@ namespace Moda.BackEnd.Domain.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "02962efa-1273-46c0-b103-7167b1742ef3", "02962efa-1273-46c0-b103-7167b1742ef3", "CUSTOMER", "customer" },
+                    { "6a32e12a-60b5-4d93-8306-82231e1232d7", "6a32e12a-60b5-4d93-8306-82231e1232d7", "ADMIN", "admin" },
+                    { "814f9270-78f5-4503-b7d3-0c567e5812ba", "814f9270-78f5-4503-b7d3-0c567e5812ba", "SHOP", "shop" },
+                    { "85b6791c-49d8-4a61-ad0b-8274ec27e764", "85b6791c-49d8-4a61-ad0b-8274ec27e764", "STAFF", "staff" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Affiliates_OrderId",
+                table: "Affiliates",
+                column: "OrderId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -509,6 +651,11 @@ namespace Moda.BackEnd.Domain.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OptionPackageHistories_OptionPackageId",
+                table: "OptionPackageHistories",
+                column: "OptionPackageId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderCoupons_CouponId",
                 table: "OrderCoupons",
                 column: "CouponId");
@@ -532,6 +679,11 @@ namespace Moda.BackEnd.Domain.Migrations
                 name: "IX_Orders_AccountId",
                 table: "Orders",
                 column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentResponses_OrderId",
+                table: "PaymentResponses",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",
@@ -564,14 +716,29 @@ namespace Moda.BackEnd.Domain.Migrations
                 column: "TagId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ratings_AccountId",
+                name: "IX_Ratings_CreateBy",
                 table: "Ratings",
-                column: "AccountId");
+                column: "CreateBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ratings_ProductId",
                 table: "Ratings",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ratings_UpdateBy",
+                table: "Ratings",
+                column: "UpdateBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShopPackages_OptionPackageHistoryId",
+                table: "ShopPackages",
+                column: "OptionPackageHistoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShopPackages_ShopId",
+                table: "ShopPackages",
+                column: "ShopId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shops_AccountId",
@@ -597,6 +764,9 @@ namespace Moda.BackEnd.Domain.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Affiliates");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -612,10 +782,16 @@ namespace Moda.BackEnd.Domain.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Configurations");
+
+            migrationBuilder.DropTable(
                 name: "OrderCoupons");
 
             migrationBuilder.DropTable(
                 name: "OrderDetails");
+
+            migrationBuilder.DropTable(
+                name: "PaymentResponses");
 
             migrationBuilder.DropTable(
                 name: "Payments");
@@ -624,13 +800,13 @@ namespace Moda.BackEnd.Domain.Migrations
                 name: "ProductTags");
 
             migrationBuilder.DropTable(
+                name: "ShopPackages");
+
+            migrationBuilder.DropTable(
                 name: "StaticFiles");
 
             migrationBuilder.DropTable(
                 name: "StockHistories");
-
-            migrationBuilder.DropTable(
-                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -642,10 +818,19 @@ namespace Moda.BackEnd.Domain.Migrations
                 name: "Orders");
 
             migrationBuilder.DropTable(
+                name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "OptionPackageHistories");
+
+            migrationBuilder.DropTable(
                 name: "Ratings");
 
             migrationBuilder.DropTable(
                 name: "ProductStocks");
+
+            migrationBuilder.DropTable(
+                name: "OptionPackages");
 
             migrationBuilder.DropTable(
                 name: "Products");

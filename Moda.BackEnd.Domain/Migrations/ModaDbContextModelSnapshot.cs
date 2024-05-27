@@ -193,6 +193,9 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -274,6 +277,56 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.Affiliate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Profit")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Affiliates");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.Configuration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ActiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ActiveValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PreValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configurations");
+                });
+
             modelBuilder.Entity("Moda.BackEnd.Domain.Models.Coupon", b =>
                 {
                     b.Property<Guid>("Id")
@@ -302,6 +355,50 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Coupons");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.OptionPackage", b =>
+                {
+                    b.Property<Guid>("OptionPackageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Duration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PackageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OptionPackageId");
+
+                    b.ToTable("OptionPackages");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.OptionPackageHistory", b =>
+                {
+                    b.Property<Guid>("OptionPackageHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("OptionPackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("PackagePrice")
+                        .HasColumnType("float");
+
+                    b.HasKey("OptionPackageHistoryId");
+
+                    b.HasIndex("OptionPackageId");
+
+                    b.ToTable("OptionPackageHistories");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Order", b =>
@@ -590,6 +687,27 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.ToTable("Shops");
                 });
 
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.ShopPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OptionPackageHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OptionPackageHistoryId");
+
+                    b.HasIndex("ShopId");
+
+                    b.ToTable("ShopPackages");
+                });
+
             modelBuilder.Entity("Moda.Backend.Domain.Models.StaticFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -726,6 +844,28 @@ namespace Moda.BackEnd.Domain.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.Affiliate", b =>
+                {
+                    b.HasOne("Moda.Backend.Domain.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.OptionPackageHistory", b =>
+                {
+                    b.HasOne("Moda.BackEnd.Domain.Models.OptionPackage", "OptionPackage")
+                        .WithMany()
+                        .HasForeignKey("OptionPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OptionPackage");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Order", b =>
@@ -882,6 +1022,25 @@ namespace Moda.BackEnd.Domain.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Moda.BackEnd.Domain.Models.ShopPackage", b =>
+                {
+                    b.HasOne("Moda.BackEnd.Domain.Models.OptionPackageHistory", "OptionPackageHistory")
+                        .WithMany()
+                        .HasForeignKey("OptionPackageHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Moda.Backend.Domain.Models.Shop", "Shop")
+                        .WithMany()
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OptionPackageHistory");
+
+                    b.Navigation("Shop");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.StaticFile", b =>
