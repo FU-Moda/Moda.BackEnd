@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Moda.BackEnd.Domain.Enum;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,7 +13,8 @@ namespace Moda.BackEnd.Domain.Models
         [Key]
         public Guid OptionPackageId { get; set; }
         public string PackageName { get; set; } = null!;
-        public DateTime Duration { get; set; }   
-        public string Description { get; set; }
+        public DateTime Duration { get; set; }
+        public string Description { get; set; } = null!;
+        public OptionPackageStatus Status { get; set; }
     }
 }

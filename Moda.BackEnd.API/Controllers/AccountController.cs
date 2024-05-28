@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Moda.BackEnd.API.Middlewares;
 using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
@@ -20,6 +21,7 @@ namespace Moda.BackEnd.API.Controllers
         public async Task<AppActionResult> CreateAccount(SignUpRequestDto request)
         {
             return await _accountService.CreateAccount(request, false);
+
         }
 
         [HttpPost("create-shop-account")]
@@ -53,6 +55,7 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPut("update-account")]
+        [RemoveCacheAtrribute("account")]
         public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDto request)
         {
             return await _accountService.UpdateAccount(request);

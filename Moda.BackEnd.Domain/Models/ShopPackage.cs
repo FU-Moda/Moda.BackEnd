@@ -15,9 +15,9 @@ namespace Moda.BackEnd.Domain.Models
         public Guid Id { get; set; }
         public Guid ShopId { get; set; }
         [ForeignKey(nameof(ShopId))]
-        public Shop Shop { get; set; }
+        public Shop Shop { get; set; } = null!;
         public Guid OptionPackageHistoryId;
         [ForeignKey(nameof(OptionPackageHistoryId))]
-        public OptionPackageHistory OptionPackageHistory { get; set; }  
+        public OptionPackageHistory OptionPackageHistory { get; set; } = null!;
     }
 }
