@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Moda.BackEnd.Domain.Migrations
 {
-    public partial class AddNewTable : Migration
+    public partial class fixDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -96,7 +96,8 @@ namespace Moda.BackEnd.Domain.Migrations
                     OptionPackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PackageName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Duration = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -304,8 +305,7 @@ namespace Moda.BackEnd.Domain.Migrations
                 name: "Affiliates",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Profit = table.Column<double>(type: "float", nullable: false)

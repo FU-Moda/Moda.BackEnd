@@ -67,6 +67,11 @@ namespace Moda.BackEnd.Common.Utils
                 public string? EndDate { get; set; }
             }
         }
+
+        public class ConfigName
+        {
+            public static string CONFIG_NAME = "PHẦN TRĂM HOA HỒNG";
+        }
         public class ResponseMessage
         {
             public static string CREATE_SUCCESSFULLY = "Tạo mới thành công";

@@ -12,8 +12,8 @@ using Moda.BackEnd.Domain.Data;
 namespace Moda.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(ModaDbContext))]
-    [Migration("20240528003710_AddColumn")]
-    partial class AddColumn
+    [Migration("20240528135010_fixDb")]
+    partial class fixDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -281,11 +281,9 @@ namespace Moda.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("Moda.BackEnd.Domain.Models.Affiliate", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
@@ -376,9 +374,8 @@ namespace Moda.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("OptionPackageId");
 

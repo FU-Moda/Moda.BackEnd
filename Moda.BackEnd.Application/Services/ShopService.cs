@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Domain.Models;
+using Moda.BackEnd.Common.Utils;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -37,7 +38,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Shop này đã tồn tại");
                 }
-                var shop = _mapper.Map<Shop>( dto );
+                var shop = _mapper.Map<Shop>(dto);
                 shop.Id = Guid.NewGuid();
                 await _repository.Insert(shop);
                 await _unitOfWork.SaveChangesAsync();
@@ -55,14 +56,55 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 result.Result = await _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, s => s.Account);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
         }
 
-        public async  Task<AppActionResult> GetShopByAccountId(string Id)
+        public async Task<AppActionResult> GetShopAffiliateByShopId(Guid shopId, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            var orderDetailRepository = Resolve<IRepository<OrderDetail>>();
+            var affiliateRepository = Resolve<IRepository<Affiliate>>();
+            var shopRepository = Resolve<IRepository<Shop>>();
+            var affiliateList = new List<Affiliate>();
+            try
+            {
+                var shopDb = await shopRepository!.GetByExpression(p => p.Id == shopId);
+                if (shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
+                }
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!);
+                if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
+                {
+                    foreach (var item in orderOfShop.Items)
+                    {
+                        var affiliateOfShop = await affiliateRepository!.GetByExpression(p => p!.OrderId == item.OrderId);
+                        if (affiliateOfShop != null)
+                        {
+                            affiliateList.Add(affiliateOfShop);
+                        }
+                    }
+                    result.Result = new PagedResult<Affiliate>
+                    {
+                        Items = affiliateList,
+                        TotalPages = orderOfShop.TotalPages,
+                    };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetShopByAccountId(string Id)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -90,7 +132,8 @@ namespace Moda.BackEnd.Application.Services
                 ShopDto data = new ShopDto();
 
                 var shopDb = await _repository.GetById(Id);
-                if(shopDb == null) {
+                if (shopDb == null)
+                {
                     result = BuildAppActionResultError(result, $"Không tìm thấy shop với id {Id}");
                     return result;
                 }
@@ -98,11 +141,11 @@ namespace Moda.BackEnd.Application.Services
                 var productRepository = Resolve<IRepository<Product>>();
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 var productDb = await productRepository!.GetAllDataByExpression(p => p.ShopId == Id, 0, 0, null, false, null);
-                if(productDb.Items != null && productDb.Items.Count > 0)
+                if (productDb.Items != null && productDb.Items.Count > 0)
                 {
-                    foreach(var product in productDb.Items)
+                    foreach (var product in productDb.Items)
                     {
-                        var currentStaticFile = await staticFileRepository!.GetAllDataByExpression(s => s.ProductId == product.Id,0,0, null, false, null);
+                        var currentStaticFile = await staticFileRepository!.GetAllDataByExpression(s => s.ProductId == product.Id, 0, 0, null, false, null);
                         List<string> imgs = currentStaticFile.Items!.Select(s => s.Img).ToList();
                         data.productResponseDtos!.Add(
                             new ProductResponseDto
@@ -128,9 +171,9 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 var shopDb = await _repository.GetById(dto.Id);
-                if(shopDb == null)
+                if (shopDb == null)
                 {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy shop với id {dto.Id}" );
+                    result = BuildAppActionResultError(result, $"Không tìm thấy shop với id {dto.Id}");
                     return result;
                 }
 
@@ -139,7 +182,8 @@ namespace Moda.BackEnd.Application.Services
                 shopDb.Description = dto.Description;
                 await _repository.Update(shopDb);
                 await _unitOfWork.SaveChangesAsync();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }

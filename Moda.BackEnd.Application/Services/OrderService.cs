@@ -16,6 +16,7 @@ using Moda.BackEnd.Domain.Enum;
 using System.Transactions;
 using static Humanizer.In;
 using Castle.Core.Resource;
+using Moda.BackEnd.Common.Utils;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -40,7 +41,10 @@ namespace Moda.BackEnd.Application.Services
                 {
                     var accountRepository = Resolve<IRepository<Account>>();
                     var productStockRepository = Resolve<IRepository<ProductStock>>();
-                    var accountDb = await accountRepository!.GetByExpression(p => p.Id == orderRequest.AccountId);
+                    var configRepository = Resolve<IRepository<Configuration>>();
+                    var affiliateRepository = Resolve<IRepository<Affiliate>>();
+                    var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
+                    var configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.CONFIG_NAME);
                     if (accountDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequest.AccountId} không tồn tại");
@@ -55,6 +59,10 @@ namespace Moda.BackEnd.Application.Services
                     {
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
+                    }
+                    if (configDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Không tìm thấy số phần trăm hoa hồng");
                     }
 
                     var order = new Order
@@ -100,9 +108,21 @@ namespace Moda.BackEnd.Application.Services
                     {
                         order.DeliveryCost = 30000;
                     }
+
+                    var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
+
+                    var affiliate = new Affiliate
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderDate = order.OrderTime,
+                        Profit = order.Total * percentOfAffiliate,
+                        OrderId = order.Id
+                    };
+
                     if (!BuildAppActionResultIsError(result))
                     {
                         await _orderRepository.Insert(order);
+                        await affiliateRepository!.Insert(affiliate);
                         await _unitOfWork.SaveChangesAsync();
                         scope.Complete();
                         result.Messages.Add("Tạo Order thành công");
@@ -125,7 +145,10 @@ namespace Moda.BackEnd.Application.Services
                 {
                     var accountRepository = Resolve<IRepository<Account>>();
                     var productStockRepository = Resolve<IRepository<ProductStock>>();
+                    var configRepository = Resolve<IRepository<Configuration>>();
+                    var affiliateRepository = Resolve<IRepository<Affiliate>>();
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                    var configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.CONFIG_NAME);
                     var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
                     if (accountDb == null)
                     {
@@ -141,6 +164,10 @@ namespace Moda.BackEnd.Application.Services
                     {
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
+                    }
+                    if (configDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Không tìm thấy số phần trăm hoa hồng");
                     }
                     var order = new Order
                     {
@@ -178,6 +205,17 @@ namespace Moda.BackEnd.Application.Services
                         await _orderDetailRepository.Insert(orderDetail);
                     }
                     order.Total = total;
+
+                    var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
+
+                    var affiliate = new Affiliate
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderDate = order.OrderTime,
+                        Profit = order.Total * percentOfAffiliate,
+                        OrderId = order.Id
+                    };
+
                     if (order.Total > 250000)
                     {
                         order.DeliveryCost = 0;
@@ -189,6 +227,7 @@ namespace Moda.BackEnd.Application.Services
                     if (!BuildAppActionResultIsError(result))
                     {
                         await _orderRepository.Insert(order);
+                        await affiliateRepository!.Insert(affiliate);
                         await _unitOfWork.SaveChangesAsync();
                         scope.Complete();
                     }
