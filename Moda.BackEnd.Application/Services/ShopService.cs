@@ -165,6 +165,19 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var 
+            } catch (Exception ex)
+            {
+
+            }
+
+        }
+
         public async Task<AppActionResult> UpdateShop(UpdateShopDto dto)
         {
             AppActionResult result = new AppActionResult();

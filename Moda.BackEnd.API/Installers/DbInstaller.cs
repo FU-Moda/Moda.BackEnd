@@ -12,7 +12,7 @@ namespace Moda.BackEnd.API.Installers
         {
             services.AddDbContext<ModaDbContext>(option =>
             {
-                option.UseSqlServer(configuration["ConnectionStrings:Host"]);
+                option.UseSqlServer(configuration["ConnectionStrings:DB"]);
             });
 
             services.AddIdentity<Account, IdentityRole>().AddEntityFrameworkStores<ModaDbContext>()
