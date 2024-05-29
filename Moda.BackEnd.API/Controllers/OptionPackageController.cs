@@ -17,7 +17,7 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-option-package/{pageNumber}/{pageSize}")]
-        public async Task<AppActionResult> GetAllOptionPackage(int pageNumber = 10, int pageSize = 1)
+        public async Task<AppActionResult> GetAllOptionPackage(int pageNumber = 1, int pageSize = 10)
         {
             return await _optionPackageService.GetAllOptionPackage(pageNumber, pageSize);   
         }
@@ -29,15 +29,15 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPost("create-option-package")]
-        public async Task<AppActionResult> CreateOptionPackage(OptionPackageDto optionPackageDto)
+        public async Task<AppActionResult> CreateOptionPackage(OptionPackageHistoryDto optionPackageHistoryDto)
         {
-            return await _optionPackageService.CreateOptionPackage(optionPackageDto);       
+            return await _optionPackageService.CreateOptionPackage(optionPackageHistoryDto);       
         }
 
         [HttpPut("update-option-package")]
-        public async Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageDto optionPackageDto)
+        public async Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageHistoryDto optionPackageHistoryDto)
         {
-            return await _optionPackageService.UpdateOptionPackage(packageId, optionPackageDto);       
+            return await _optionPackageService.UpdateOptionPackage(packageId, optionPackageHistoryDto);       
         }
 
         [HttpPost("delete-option-package")]

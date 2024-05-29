@@ -12,8 +12,8 @@ namespace Moda.BackEnd.Application.IServices
     {
         Task<AppActionResult> GetAllOptionPackage(int pageNumber, int pageSize);
         Task<AppActionResult> GetOptionPackageById(Guid optionPackageId);
-        Task<AppActionResult> CreateOptionPackage(OptionPackageDto optionPackageDto);
-        Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageDto optionPackageDto);
+        Task<AppActionResult> CreateOptionPackage(OptionPackageHistoryDto optionPackageDto);
+        Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageHistoryDto optionPackageDto);
         Task<AppActionResult> DeleteOptionPackage(Guid packageId);
     }
 }

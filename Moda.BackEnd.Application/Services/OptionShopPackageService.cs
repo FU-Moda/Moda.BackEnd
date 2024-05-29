@@ -16,23 +16,25 @@ namespace Moda.BackEnd.Application.Services
     public class OptionShopPackageService : GenericBackendService, IOptionPackageService
     {
         private readonly IRepository<OptionPackage> _repository;
+        private readonly IRepository<OptionPackageHistory> _optionPackageHistory;
         private readonly IUnitOfWork _unitOfWork;
         public OptionShopPackageService(
             IServiceProvider serviceProvider,
             IRepository<OptionPackage> repository,
+            IRepository<OptionPackageHistory> optionPackageHistory,
             IUnitOfWork unitOfWork) : base(serviceProvider)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _optionPackageHistory = optionPackageHistory;   
         }
 
-        public async Task<AppActionResult> CreateOptionPackage(OptionPackageDto optionPackageDto)
+        public async Task<AppActionResult> CreateOptionPackage(OptionPackageHistoryDto optionPackageHistoryDto)
         {
             var result = new AppActionResult();
-            var optionPackageHistory = Resolve<IRepository<OptionPackageHistory>>();
             try
             {
-                var existingPackage = await _repository.GetByExpression(p => p!.PackageName == optionPackageDto.PackageName);
+                var existingPackage = await _repository.GetByExpression(p => p!.PackageName == optionPackageHistoryDto.OptionPackageDto.PackageName);
                 if (existingPackage != null)
                 {
                     return BuildAppActionResultError(result, "A package with the same name already exists.");
@@ -40,22 +42,22 @@ namespace Moda.BackEnd.Application.Services
                 var optionPackageDb = new OptionPackage
                 {
                     OptionPackageId = Guid.NewGuid(),
-                    PackageName = optionPackageDto.PackageName,
-                    Description = optionPackageDto.Description,
-                    Duration = optionPackageDto.Duration,
+                    PackageName = optionPackageHistoryDto.OptionPackageDto.PackageName,
+                    Description = optionPackageHistoryDto.OptionPackageDto.Description,
+                    Duration = optionPackageHistoryDto.OptionPackageDto.Duration,
                     Status = OptionPackageStatus.ACTIVE,
                 };
-
                 var optionPackageHistoryDb = new OptionPackageHistory
                 {
                     OptionPackageHistoryId = Guid.NewGuid(),
                     OptionPackageId = optionPackageDb.OptionPackageId,
-                    PackagePrice = optionPackageDto.Price,
-                    Date = optionPackageDto.Date,
+                    PackagePrice = optionPackageHistoryDto.PackagePrice,
+                    Date = optionPackageHistoryDto.Date,
                 };
+            
 
+                await _optionPackageHistory!.Insert(optionPackageHistoryDb);
                 await _repository.Insert(optionPackageDb);
-                await optionPackageHistory!.Insert(optionPackageHistoryDb);
                 await _unitOfWork.SaveChangesAsync();
                 result.Messages.Add("Tạo Package thành công");
             }
@@ -71,7 +73,6 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-
                 var packageDb = await _repository.GetByExpression(p => p.OptionPackageId == packageId);
                 if (packageDb == null)
                 {
@@ -89,11 +90,10 @@ namespace Moda.BackEnd.Application.Services
 
         public async Task<AppActionResult> GetAllOptionPackage(int pageNumber, int pageSize)
         {
-            var optionPackageHistory = Resolve<IRepository<OptionPackageHistory>>();
             var result = new AppActionResult();
             try
             {
-                result.Result = await optionPackageHistory!.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.OptionPackage!);
+                result.Result = await _optionPackageHistory.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.OptionPackage!);
             }
             catch (Exception ex)
             {
@@ -104,11 +104,10 @@ namespace Moda.BackEnd.Application.Services
 
         public async Task<AppActionResult> GetOptionPackageById(Guid optionPackageId)
         {
-            var optionPackageHistory = Resolve<IRepository<OptionPackageHistory>>();
             var result = new AppActionResult();
             try
             {
-                result.Result = await optionPackageHistory!.GetByExpression(p => p.OptionPackageId == optionPackageId, p => p.OptionPackage!);
+                result.Result = await _optionPackageHistory!.GetByExpression(p => p.OptionPackageId == optionPackageId, p => p.OptionPackage!);
             }
             catch (Exception ex)
             {
@@ -117,10 +116,9 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageDto optionPackageDto)
+        public async Task<AppActionResult> UpdateOptionPackage(Guid packageId, OptionPackageHistoryDto optionPackageHistory)
         {
             var result = new AppActionResult();
-            var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
             try
             {
                 var optionPackageDb = await _repository.GetByExpression(p => p!.OptionPackageId == packageId);
@@ -129,14 +127,14 @@ namespace Moda.BackEnd.Application.Services
                     return BuildAppActionResultError(result, "Package này không tồn tại.");
                 }
 
-                optionPackageDb.PackageName = optionPackageDto.PackageName;
-                optionPackageDb.Description = optionPackageDto.Description;
-                optionPackageDb.Duration = optionPackageDto.Duration;
-                var latestHistory = await optionPackageHistoryRepository!.GetByExpression(h => h!.OptionPackageId == packageId);
+                optionPackageDb.PackageName = optionPackageHistory.OptionPackageDto.PackageName;
+                optionPackageDb.Description = optionPackageHistory.OptionPackageDto.Description;
+                optionPackageDb.Duration = optionPackageHistory.OptionPackageDto.Duration;
+                var latestHistory = await _optionPackageHistory!.GetByExpression(h => h!.OptionPackageId == packageId);
                 if (latestHistory != null)
                 {
                     // Update the existing history record
-                    latestHistory.PackagePrice = optionPackageDto.Price;
+                    latestHistory.PackagePrice = optionPackageHistory.PackagePrice;
                 }
                 else
                 {
@@ -145,10 +143,10 @@ namespace Moda.BackEnd.Application.Services
                     {
                         OptionPackageHistoryId = Guid.NewGuid(),
                         OptionPackageId = optionPackageDb.OptionPackageId,
-                        PackagePrice = optionPackageDto.Price,
-                        Date = optionPackageDto.Date,
+                        PackagePrice = optionPackageHistory.PackagePrice,
+                        Date = optionPackageHistory.Date,
                     };
-                    await optionPackageHistoryRepository.Insert(newOptionPackageHistoryDb);
+                    await _optionPackageHistory.Insert(newOptionPackageHistoryDb);
                 }
 
                 // Update the package in the repository
