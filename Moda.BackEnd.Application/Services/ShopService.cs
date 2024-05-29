@@ -165,6 +165,53 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                var productRepository = Resolve<IRepository<Product>>();
+                var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                var shopWithBanner = await shopPackageRepository!.GetAllDataByExpression(s => s.OptionPackageHistory.OptionPackage.IsBannerAvailable,0,0, null, false, s => s.Shop);
+                if(shopWithBanner.Items != null && shopWithBanner.Items.Count > 0) {
+                    var shopDb = shopWithBanner.Items.Select(s => s.Shop).ToList(); 
+                    List < ShopDto > data = new List<ShopDto>();
+                    foreach(var shop in shopDb)
+                    {
+                        var productDb = await productRepository!.GetAllDataByExpression(p => p.ShopId == shop.Id, 0, 0, null, false, null);
+                        List<ProductResponseDto> productResponse = new List<ProductResponseDto>();
+                        foreach(var product in productDb.Items!)
+                        {
+                            var img = await staticFileRepository!.GetAllDataByExpression(s => s.ProductId == product.Id, 0, 0, null, false, null);
+                            productResponse.Add(
+                                new ProductResponseDto
+                                {
+                                    Product = product,
+                                    Img = img.Items!.Select(s => s.Img).ToList()
+                                }
+                                );
+                        }
+                        data.Add(new ShopDto
+                        {
+                            Shop = shop,
+                            productResponseDtos = productResponse
+                        });
+                    }
+                    result.Result = new PagedResult<ShopDto>
+                    {
+                        Items = data.Skip(pageNumber - 1).Take(pageSize).ToList(),
+                        TotalPages = data.Count() / pageSize
+                    };
+                }
+            } catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+
+        }
+
         public async Task<AppActionResult> UpdateShop(UpdateShopDto dto)
         {
             AppActionResult result = new AppActionResult();

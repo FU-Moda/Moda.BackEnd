@@ -59,32 +59,33 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
+                bool isValidShopForDashboard = await IsValidShop(ShopId);
                 Expression<Func<OrderDetail, bool>> predicate = null;
                 DateTime comparisonDate = DateTime.UtcNow;
 
                 if (timePeriod > 3)
                 {
-                    predicate = o => o.Order.OrderTime.Year == timePeriod && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                    predicate = o => o.Order.OrderTime.Year == timePeriod && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
                 else if (timePeriod == 0)
                 {
                     comparisonDate = DateTime.Now.AddDays(-7);
-                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
                 else if (timePeriod == 1)
                 {
                     comparisonDate = DateTime.Now.AddMonths(-1);
-                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
                 else if (timePeriod == 2)
                 {
                     comparisonDate = DateTime.UtcNow.AddMonths(-6);
-                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
                 else
                 {
                     comparisonDate = DateTime.UtcNow.AddMonths(-12);
-                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId);
+                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
 
                 var orderDetail = await _orderDetailRepository.GetAllDataByExpression(predicate, 0, 0, null, false, o => o.ProductStock.Product);
@@ -142,6 +143,7 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
+                bool isValidShopForDashboard = await IsValidShop(ShopId);
                 RevenueResponse data = new RevenueResponse();
                 var orderDb = new PagedResult<Order>();
                 // 0: week, 1: month, 2: 6 months, 3: last year, 2022, 2023
@@ -149,7 +151,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if(ShopId != null)
                     {
-                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                         if(orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
@@ -167,7 +169,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
@@ -187,7 +189,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
@@ -207,7 +209,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                         if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                         {
                             List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
@@ -226,7 +228,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                      if (ShopId != null)
                         {
-                            var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
                             {
                                 List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
@@ -277,6 +279,7 @@ namespace Moda.BackEnd.Application.Services
             AppActionResult result = new AppActionResult();
             try
             {
+                bool isValidShopForDashboard = await IsValidShop(ShopId);
                 UserReportResponse data = new UserReportResponse();
                 if(timePeriod > 3)
                 {
@@ -296,17 +299,17 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddDays(7) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
+                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddDays(7) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, null);
                         if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
                         {
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                             data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                         else
                         {
                             data.newCustomer = 0;
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                     }
@@ -334,17 +337,17 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
+                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, null);
                         if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
                         {
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                             data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                         else
                         {
                             data.newCustomer = 0;
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                     }
@@ -372,16 +375,16 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(6) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
+                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddMonths(6) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, null);
                         if(toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
                         {
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                             data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         } else
                         {
                             data.newCustomer = 0;
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                     }
@@ -409,17 +412,17 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (ShopId != null)
                     {
-                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddYears(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, null);
+                        var toExcludeOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.Order.OrderTime.AddYears(1) < DateTime.Now && o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, null);
                         if (toExcludeOrder.Items != null && toExcludeOrder.Items.Count > 0)
                         {
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                             data.newCustomer = data.totalCustomer - toExcludeOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                         else
                         {
                             data.newCustomer = 0;
-                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId, 0, 0, null, false, o => o.Order);
+                            var totalOrder = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
                             data.totalCustomer = totalOrder.Items.DistinctBy(o => o.Order.AccountId).Count();
                         }
                     }
@@ -461,7 +464,22 @@ namespace Moda.BackEnd.Application.Services
         //// How to minitor new access? Tổng account của sàn, số account mua của shop
         //public Task<AppActionResult> GetUserReport(int time, bool IsForShop);
 
-
+        private async Task<bool> IsValidShop(Guid? ShopId)
+        {
+            if (ShopId == null) return true;
+            bool result = false;
+            try
+            {
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                var shopWithDashboard = await shopPackageRepository!.GetAllDataByExpression(s => s.OptionPackageHistory.OptionPackage.IsBannerAvailable && s.ShopId == ShopId, 0, 0, null, false, s => s.Shop);
+                return shopWithDashboard.Items!.Count() > 0;
+            }
+            catch (Exception ex)
+            {
+                result = false;
+            }
+            return result;
+        }
 
     }
 }
