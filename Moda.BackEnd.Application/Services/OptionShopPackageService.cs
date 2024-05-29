@@ -93,11 +93,31 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                var optionPackageListDb = _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, null);
-                if (optionPackageListDb == null)
+                var listOptionPackageList = new List<OptionPackageResponse>();
+                var optionPackagetDb = await _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, null);
+                if (optionPackagetDb == null)
                 {
                     result = BuildAppActionResultError(result, "Gói này không tìm thấy");
                 }
+                if (optionPackagetDb!.Items != null && optionPackagetDb.Items.Count > 0)
+                {
+                    var optionResponse = new OptionPackageResponse();       
+                    foreach (var item in optionPackagetDb.Items)
+                    {
+                        var optionPackageHistoriesDb = await _optionPackageHistory.GetAllDataByExpression(p => p.OptionPackageId == item.OptionPackageId, 0, 0, null, false, p => p.OptionPackage);
+                        if (optionPackageHistoriesDb.Items != null && optionPackageHistoriesDb.Items.Count > 0)
+                        {
+                            optionResponse.OptionPackage = item;
+                            optionResponse.OptionPackageHistory = optionPackageHistoriesDb!.Items;
+                            listOptionPackageList.Add(optionResponse);
+                        }
+                    }
+                }
+                result.Result = new PagedResult<OptionPackageResponse>
+                {
+                    Items = listOptionPackageList,
+                    TotalPages = optionPackagetDb.TotalPages,
+                };
             }
             catch (Exception ex)
             {
