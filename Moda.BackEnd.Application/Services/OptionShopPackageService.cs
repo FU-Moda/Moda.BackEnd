@@ -52,7 +52,7 @@ namespace Moda.BackEnd.Application.Services
                     OptionPackageHistoryId = Guid.NewGuid(),
                     OptionPackageId = optionPackageDb.OptionPackageId,
                     PackagePrice = optionPackageHistoryDto.PackagePrice,
-                    Date = optionPackageHistoryDto.Date,
+                    Date = DateTime.Now,
                 };
             
 
@@ -93,7 +93,11 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                result.Result = await _optionPackageHistory.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.OptionPackage!);
+                var optionPackageListDb = _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, null);
+                if (optionPackageListDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Gói này không tìm thấy");
+                }
             }
             catch (Exception ex)
             {
@@ -107,7 +111,20 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                result.Result = await _optionPackageHistory!.GetByExpression(p => p.OptionPackageId == optionPackageId, p => p.OptionPackage!);
+                var optionPackageResponse = new OptionPackageResponse();
+                var optionPackageDb = await _repository.GetByExpression(p => p!.OptionPackageId == optionPackageId);
+                if (optionPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Gói này không tìm thấy");
+                }
+                var optionPackageHistoriesDb = await _optionPackageHistory.GetAllDataByExpression(p => p.OptionPackageId == optionPackageId, 0, 0, null, false, p => p.OptionPackage);
+                if (optionPackageHistoriesDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Lịch sử của gói này không tìm thấy");
+                }
+                optionPackageResponse.OptionPackage = optionPackageDb!;
+                optionPackageResponse.OptionPackageHistory = optionPackageHistoriesDb!.Items!;
+                result.Result = optionPackageResponse;      
             }
             catch (Exception ex)
             {
@@ -144,7 +161,6 @@ namespace Moda.BackEnd.Application.Services
                         OptionPackageHistoryId = Guid.NewGuid(),
                         OptionPackageId = optionPackageDb.OptionPackageId,
                         PackagePrice = optionPackageHistory.PackagePrice,
-                        Date = optionPackageHistory.Date,
                     };
                     await _optionPackageHistory.Insert(newOptionPackageHistoryDb);
                 }

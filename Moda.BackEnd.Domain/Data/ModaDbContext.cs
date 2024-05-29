@@ -36,7 +36,6 @@ namespace Moda.BackEnd.Domain.Data
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<OptionPackage> OptionPackages { get; set; }    
         public DbSet<OptionPackageHistory> OptionPackageHistories { get; set; } 
         public DbSet<Configuration> Configurations { get; set; }    
@@ -102,17 +101,17 @@ namespace Moda.BackEnd.Domain.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            IConfiguration config = new ConfigurationBuilder()
-                           .SetBasePath(Directory.GetCurrentDirectory())
-                           .AddJsonFile("appsettings.json", true, true)
-                           .Build();
-            string cs = config["ConnectionStrings:Host"];
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(cs);
-            }
-            //optionsBuilder.UseSqlServer(
-            //   "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
+            //IConfiguration config = new ConfigurationBuilder()
+            //               .SetBasePath(Directory.GetCurrentDirectory())
+            //               .AddJsonFile("appsettings.json", true, true)
+            //               .Build();
+            //string cs = config["ConnectionStrings:Host"];
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //    optionsBuilder.UseSqlServer(cs);
+            //}
+            optionsBuilder.UseSqlServer(
+               "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         }
     }
 }

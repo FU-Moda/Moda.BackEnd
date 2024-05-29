@@ -12,7 +12,6 @@ namespace Moda.BackEnd.Common.DTO.Request
     public class OptionPackageHistoryDto
     {
         public double PackagePrice { get; set; }
-        public DateTime Date { get; set; }
         public OptionPackageDto OptionPackageDto { get; set; } = null!;
     }
     public class OptionPackageDto

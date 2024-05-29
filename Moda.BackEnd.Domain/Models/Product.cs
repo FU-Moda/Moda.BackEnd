@@ -21,5 +21,6 @@ namespace Moda.Backend.Domain.Models
         public Guid ShopId { get; set; }
         [ForeignKey(nameof(ShopId))]
         public Shop? Shop { get; set; }
+        public ProductStatus Status { get; set; }       
     }
 }

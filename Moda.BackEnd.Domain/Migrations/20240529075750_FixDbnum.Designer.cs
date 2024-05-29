@@ -12,8 +12,8 @@ using Moda.BackEnd.Domain.Data;
 namespace Moda.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(ModaDbContext))]
-    [Migration("20240528135010_fixDb")]
-    partial class fixDb
+    [Migration("20240529075750_FixDbnum")]
+    partial class FixDbnum
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -556,6 +556,9 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ShopId");
@@ -584,14 +587,9 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.Property<int?>("ShoeSize")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("WarehouseId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("WarehouseId");
 
                     b.ToTable("ProductStocks");
                 });
@@ -776,28 +774,6 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("Moda.Backend.Domain.Models.Warehouse", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Warehouses");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -961,15 +937,7 @@ namespace Moda.BackEnd.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Moda.Backend.Domain.Models.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Product");
-
-                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("Moda.BackEnd.Domain.Models.ProductTag", b =>

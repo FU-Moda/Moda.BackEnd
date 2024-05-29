@@ -50,6 +50,7 @@ namespace Moda.BackEnd.Application.Services
                     {
                         var productMapper = _mapper.Map<Product>(productDto);
                         productMapper.Id = Guid.NewGuid();
+                        productMapper.Status = ProductStatus.PENDING;
 
                         var productStockList = new List<ProductStock>();
                         foreach (var item in productDto!.ProductStocks!)
@@ -61,7 +62,6 @@ namespace Moda.BackEnd.Application.Services
                                 Quantity = item.Quantity,
                                 ClothingSize = item.ClothingSize,
                                 ShoeSize = item.ShoeSize,
-                                WarehouseId = item.WarehouseId,
                                 Price = item.Price,
                             });
                         }
@@ -129,29 +129,37 @@ namespace Moda.BackEnd.Application.Services
             var staticFileRepository = Resolve<IRepository<StaticFile>>();
             var productStockRepository = Resolve<IRepository<ProductStock>>();
             var productResponseList = new List<ProductResponse>();
+            var shopPackagesRepository = Resolve<IRepository<ShopPackage>>();
             try
             {
-                var productList = await _productRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.Shop!, p => p.Shop!);
-                if (productList!.Items!.Count > 0 && productList.Items != null)
+                var shopPackagesDb = await shopPackagesRepository!.GetAllDataByExpression(null, 0, 0, null, false, p => p.Shop!, p => p.OptionPackageHistory);
+                if (shopPackagesDb.Items != null && shopPackagesDb.Items.Count > 0)
                 {
-                    foreach (var item in productList.Items)
+                    foreach (var shop in shopPackagesDb.Items)
                     {
-                        var productResponse = new ProductResponse();
-                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
-                        var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
-                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        var productList = await _productRepository.GetAllDataByExpression(p => p.Status == ProductStatus.CONFIRMED && p.ShopId == shop.ShopId, pageNumber, pageSize, null, false, p => p.Shop!, p => p.Shop!);
+                        if (productList!.Items!.Count > 0 && productList.Items != null)
                         {
-                            productResponse.Product = item;
-                            productResponse.StaticFile = staticFileDb!.Items;
-                            productResponse.ProductStock = productStockDb!.Items;
-                            productResponseList.Add(productResponse);
+                            foreach (var item in productList.Items)
+                            {
+                                var productResponse = new ProductResponse();
+                                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
+                                var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
+                                if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                                {
+                                    productResponse.Product = item;
+                                    productResponse.StaticFile = staticFileDb!.Items;
+                                    productResponse.ProductStock = productStockDb!.Items;
+                                    productResponseList.Add(productResponse);
+                                }
+                            }
+                            result.Result = new PagedResult<ProductResponse>
+                            {
+                                Items = productResponseList,
+                                TotalPages = productList.TotalPages
+                            };
                         }
                     }
-                    result.Result = new PagedResult<ProductResponse>
-                    {
-                        Items = productResponseList,
-                        TotalPages = productList.TotalPages
-                    };
                 }
             }
             catch (Exception ex)
@@ -169,13 +177,13 @@ namespace Moda.BackEnd.Application.Services
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
                 var productStockRepository = Resolve<IRepository<ProductStock>>();
                 var productResponseList = new List<ProductResponse>();
-                var productList = await _productRepository.GetAllDataByExpression(p => p.ClothType == productFilter.ClothType || p.Gender == productFilter.Gender, pageNumber, pageSize, null, false, p => p.Shop!);
+                var productList = await _productRepository.GetAllDataByExpression(p => (p.ClothType == productFilter.ClothType || p.Gender == productFilter.Gender) && p.Status == ProductStatus.CONFIRMED, pageNumber, pageSize, null, false, p => p.Shop!);
                 if (productList!.Items!.Count > 0 && productList.Items != null)
                 {
                     foreach (var item in productList.Items)
                     {
                         var productResponse = new ProductResponse();
-                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
                         if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
@@ -212,7 +220,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                 }
-                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, p => p.Warehouse!);
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, null);
                 var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, p => p.Rating!);
                 if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                 {
@@ -237,18 +245,18 @@ namespace Moda.BackEnd.Application.Services
             var productResponseList = new List<ProductResponse>();
             try
             {
-                var productList = await _productRepository.GetAllDataByExpression(p => p.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Shop!);
+                var productList = await _productRepository.GetAllDataByExpression(p => p.ShopId == shopId && p.Status == ProductStatus.CONFIRMED, pageNumber, pageSize, null, false, p => p.Shop!);
                 if (productList!.Items!.Count > 0 && productList.Items != null)
                 {
                     foreach (var item in productList.Items)
                     {
                         var productResponse = new ProductResponse();
-                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Warehouse!);
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
                         var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
                         if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null || staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
                         {
                             productResponse.Product = item;
-                            productResponse.StaticFile = staticFileDb.Items.ToList();
+                            productResponse.StaticFile = staticFileDb!.Items!.ToList();
                             productResponse.ProductStock = productStockDb!.Items!;
                             productResponseList.Add(productResponse);
                         }
@@ -311,7 +319,7 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 var productStockRepository = Resolve<IRepository<ProductStock>>();
-                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!.Shop!, p => p.Warehouse!);
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p!.ProductId == productId, pageNumber, pageSize, null, false, p => p.Product!.Shop!);
                 if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null)
                 {
                     // Assume the product details are the same for all product stock entries, so take the first one
@@ -348,7 +356,7 @@ namespace Moda.BackEnd.Application.Services
                         return BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
                     }
 
-                    
+
 
                     var oldFiles = await staticFileRepository!.GetAllDataByExpression(p => p!.ProductId == productDb!.Id, 0, 0, null, false, null);
                     if (oldFiles.Items == null || !oldFiles.Items.Any())
