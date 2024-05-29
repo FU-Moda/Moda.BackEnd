@@ -25,7 +25,6 @@ namespace Moda.BackEnd.Domain.Data
 
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Product> Products { get; set; }
@@ -105,7 +104,7 @@ namespace Moda.BackEnd.Domain.Data
                            .SetBasePath(Directory.GetCurrentDirectory())
                            .AddJsonFile("appsettings.json", true, true)
                            .Build();
-            string cs = config["ConnectionStrings:DB"];
+            string cs = config["ConnectionStrings:Host"];
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(cs);

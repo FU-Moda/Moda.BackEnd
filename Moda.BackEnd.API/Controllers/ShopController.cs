@@ -59,6 +59,12 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetShopAffiliateByShopId(shopId, pageNumber, pageSize);
         }
 
+        [HttpGet("get-shop-with-banner/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetShopWithBanner(int pageNumber = 1, int pageSize = 10)
+        {
+            return await _service.GetShopWithBanner(pageNumber, pageSize);
+        }
+
         [RemoveCacheAtrribute("shop")]
         [HttpGet("remove-cache")]
         public IActionResult RemoveCache()

@@ -41,7 +41,7 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public Task<AppActionResult> UpdateConfiguration()
+        public async Task<AppActionResult> UpdateConfiguration(Guid configurationId)
         {
             var result = new AppActionResult();
             try
@@ -52,6 +52,7 @@ namespace Moda.BackEnd.Application.Services
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+            return result;
         }
     }
 }
