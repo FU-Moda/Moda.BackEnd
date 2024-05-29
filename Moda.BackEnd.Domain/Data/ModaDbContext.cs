@@ -30,7 +30,7 @@ namespace Moda.BackEnd.Domain.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductStock> ProductStocks { get; set; }
         public DbSet<ProductTag> ProductTags { get; set; }
-        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Rating> Rating { get; set; }
         public DbSet<Shop> Shops { get; set; }
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
