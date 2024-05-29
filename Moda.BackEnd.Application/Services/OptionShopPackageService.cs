@@ -46,6 +46,8 @@ namespace Moda.BackEnd.Application.Services
                     Description = optionPackageHistoryDto.OptionPackageDto.Description,
                     Duration = optionPackageHistoryDto.OptionPackageDto.Duration,
                     Status = OptionPackageStatus.ACTIVE,
+                    IsBannerAvailable = optionPackageHistoryDto.OptionPackageDto.IsBannerAvailable, 
+                    IsDashboardAvailable = optionPackageHistoryDto.OptionPackageDto.IsDashboardAvailable,
                 };
                 var optionPackageHistoryDb = new OptionPackageHistory
                 {
@@ -94,7 +96,7 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 var listOptionPackageList = new List<OptionPackageResponse>();
-                var optionPackagetDb = await _repository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, null);
+                var optionPackagetDb = await _repository.GetAllDataByExpression(p => p.Status == OptionPackageStatus.ACTIVE, pageNumber, pageSize, null, false, null);
                 if (optionPackagetDb == null)
                 {
                     result = BuildAppActionResultError(result, "Gói này không tìm thấy");
@@ -167,6 +169,8 @@ namespace Moda.BackEnd.Application.Services
                 optionPackageDb.PackageName = optionPackageHistory.OptionPackageDto.PackageName;
                 optionPackageDb.Description = optionPackageHistory.OptionPackageDto.Description;
                 optionPackageDb.Duration = optionPackageHistory.OptionPackageDto.Duration;
+                optionPackageDb.IsBannerAvailable = optionPackageDb.IsBannerAvailable;
+                optionPackageDb.IsDashboardAvailable = optionPackageDb.IsDashboardAvailable;
                 var latestHistory = await _optionPackageHistory!.GetByExpression(h => h!.OptionPackageId == packageId);
                 if (latestHistory != null)
                 {

@@ -19,5 +19,9 @@ namespace Moda.BackEnd.Common.DTO.Request
         public string PackageName { get; set; } = null!;
         public DateTime Duration { get; set; }
         public string Description { get; set; } = null!;
+        public OptionPackageStatus Status { get; set; }
+        public OptionPackagePriority Priority { get; set; }
+        public bool IsDashboardAvailable { get; set; }
+        public bool IsBannerAvailable { get; set; }
     }
 }
