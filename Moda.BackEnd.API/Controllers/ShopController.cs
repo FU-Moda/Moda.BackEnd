@@ -7,7 +7,7 @@ using Moda.BackEnd.Common.DTO.Response;
 
 namespace Moda.BackEnd.API.Controllers
 {
-    [Route("api/shop")]
+    [Route("shop")]
     [ApiController]
     public class ShopController : ControllerBase
     {
@@ -57,6 +57,13 @@ namespace Moda.BackEnd.API.Controllers
         public async Task<AppActionResult> GetShopAffiliateByShopId(Guid shopId, int pageNumber = 1, int pageSize = 10)
         {
             return await _service.GetShopAffiliateByShopId(shopId, pageNumber, pageSize);
+        }
+
+        [RemoveCacheAtrribute("shop")]
+        [HttpGet("remove-cache")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
         }
     }
 }

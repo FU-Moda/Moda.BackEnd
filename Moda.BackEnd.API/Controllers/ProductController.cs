@@ -4,6 +4,7 @@ using Moda.BackEnd.API.Middlewares;
 using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
+using Moda.BackEnd.Domain.Enum;
 
 namespace Moda.BackEnd.API.Controllers
 {
@@ -77,6 +78,18 @@ namespace Moda.BackEnd.API.Controllers
         public async Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber = 1, int pageSize = 10)
         {
             return await _productService.GetProductRatingByProductId(productId, pageNumber, pageSize);
+        }
+        [HttpPost("update-product-status/{productId}")]
+        public async Task<AppActionResult> UpdateProductStatus(Guid productId, ProductStatus productStatus)
+        {
+            return await _productService.UpdateProductStatus(productId, productStatus);     
+        }
+
+        [RemoveCacheAtrribute("product")]
+        [HttpGet("product")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
         }
     }
 }

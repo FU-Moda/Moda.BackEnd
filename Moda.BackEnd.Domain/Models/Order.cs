@@ -22,6 +22,9 @@ namespace Moda.Backend.Domain.Models
         public string AccountId { get; set; } = null!;
         [ForeignKey(nameof(AccountId))]
         public Account? Account { get; set; }    
-        public DateTime OrderTime { get; set; } 
+        public DateTime OrderTime { get; set; }
+        public Guid CouponId { get; set; }
+        [ForeignKey(nameof(CouponId))]
+        public Coupon? Coupon { get; set;}
     }
 }
