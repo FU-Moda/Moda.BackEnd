@@ -25,13 +25,12 @@ namespace Moda.BackEnd.Domain.Data
 
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderCoupon> OrderCoupons { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductStock> ProductStocks { get; set; }
         public DbSet<ProductTag> ProductTags { get; set; }
-        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Rating> Rating { get; set; }
         public DbSet<Shop> Shops { get; set; }
         public DbSet<StaticFile> StaticFiles { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
@@ -101,17 +100,17 @@ namespace Moda.BackEnd.Domain.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            IConfiguration config = new ConfigurationBuilder()
-                           .SetBasePath(Directory.GetCurrentDirectory())
-                           .AddJsonFile("appsettings.json", true, true)
-                           .Build();
-            string cs = config["ConnectionStrings:Host"];
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(cs);
-            }
-            //optionsBuilder.UseSqlServer(
-            //   "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
+            //IConfiguration config = new ConfigurationBuilder()
+            //               .SetBasePath(Directory.GetCurrentDirectory())
+            //               .AddJsonFile("appsettings.json", true, true)
+            //               .Build();
+            //string cs = config["ConnectionStrings:Host"];
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //    optionsBuilder.UseSqlServer(cs);
+            //}
+            optionsBuilder.UseSqlServer(
+               "server=.;database=Moda;uid=sa;pwd=12345;TrustServerCertificate=True;MultipleActiveResultSets=True;");
         }
     }
 }

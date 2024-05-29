@@ -29,7 +29,12 @@ namespace Moda.BackEnd.Infrastructure.Mapping
               .ReverseMap()
               ;
 
-          
+                config.CreateMap<Configuration, ConfigurationDto>()
+             .ForMember(desc => desc.PreValue, act => act.MapFrom(src => src.PreValue))
+             .ForMember(desc => desc.ActiveValue, act => act.MapFrom(src => src.ActiveValue))
+             .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+             .ReverseMap();
+
                 config.CreateMap<Product, ProductDto>()
                 .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
                 .ForMember(desc => desc.Description, act => act.MapFrom(src => src.Description))
@@ -68,7 +73,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                .ForMember(desc => desc.Id, act => act.MapFrom(src => src.Id))
                .ForMember(desc => desc.ProductId, act => act.MapFrom(src => src.ProductId))
                .ForMember(desc => desc.RatingId, act => act.MapFrom(src => src.RatingId))
-               .ReverseMap();   
+               .ReverseMap();
                 ;
 
                 config.CreateMap<CreateRatingRequest, Rating>()
@@ -96,7 +101,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
                .ReverseMap();
                 ;
             });
-            return mappingConfig;   
+            return mappingConfig;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Moda.BackEnd.API.Middlewares
             }
             var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
             var result = await next();
-            if (result.Result is ObjectResult okObjectResult)
+            if (result.Result is OkResult okObjectResult)
             {
                 await cacheService.RemoveCacheResponseAsync(pathEndPoint);
             }

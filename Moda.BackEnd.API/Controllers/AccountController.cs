@@ -120,5 +120,12 @@ namespace Moda.BackEnd.API.Controllers
         {
             return await _accountService.GoogleCallBack(accessTokenFromGoogle);
         }
+
+        [RemoveCacheAtrribute("account")]
+        [HttpGet("remove-cache")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
+        }
     }
 }

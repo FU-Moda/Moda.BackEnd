@@ -135,7 +135,8 @@ namespace Moda.BackEnd.Application.Services
                 var shopPackagesDb = await shopPackagesRepository!.GetAllDataByExpression(null, 0, 0, null, false, p => p.Shop!, p => p.OptionPackageHistory);
                 if (shopPackagesDb.Items != null && shopPackagesDb.Items.Count > 0)
                 {
-                    foreach (var shop in shopPackagesDb.Items)
+                    var sortedShopPackages = shopPackagesDb!.Items!.OrderByDescending(p => p.OptionPackageHistory.PackagePrice);
+                    foreach (var shop in sortedShopPackages)
                     {
                         var productList = await _productRepository.GetAllDataByExpression(p => p.Status == ProductStatus.CONFIRMED && p.ShopId == shop.ShopId, pageNumber, pageSize, null, false, p => p.Shop!, p => p.Shop!);
                         if (productList!.Items!.Count > 0 && productList.Items != null)
@@ -440,5 +441,37 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> UpdateProductStatus(Guid productId, ProductStatus productStatus)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var productDb = await _productRepository.GetByExpression(p => p.Id == productId, p => p.Shop!);
+                var staticFileRepository = Resolve<IRepository<StaticFile>>();
+                var productStockRepository = Resolve<IRepository<ProductStock>>();
+                var productResponse = new ProductResponse();
+                if (productDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Loại sản phẩm này không tồn tại");
+                }
+                productDb!.Status = productStatus;
+                await _unitOfWork.SaveChangesAsync();
+                var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, null);
+                var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == productId, 0, 0, null, false, p => p.Rating!);
+                if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null && staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                {
+                    productResponse.Product = productDb!;
+                    productResponse.StaticFile = staticFileDb!.Items;
+                    productResponse.ProductStock = productStockDb!.Items;
+                }
+                result.Result = productResponse;
+
+            }
+            catch (Exception ex)
+            {
+                return BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
+            }
+            return result;
+        }
     }
 }

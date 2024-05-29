@@ -110,5 +110,12 @@ namespace Moda.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderDetailsByOrderId(orderId);
         }
+
+        [RemoveCacheAtrribute("account")]
+        [HttpGet("remove-cache")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
+        }
     }
 }
