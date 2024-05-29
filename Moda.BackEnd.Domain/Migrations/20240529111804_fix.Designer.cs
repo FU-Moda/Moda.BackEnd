@@ -12,8 +12,8 @@ using Moda.BackEnd.Domain.Data;
 namespace Moda.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(ModaDbContext))]
-    [Migration("20240529075750_FixDbnum")]
-    partial class FixDbnum
+    [Migration("20240529111804_fix")]
+    partial class fix
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -370,9 +370,15 @@ namespace Moda.BackEnd.Domain.Migrations
                     b.Property<DateTime>("Duration")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDashboardAvailable")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PackageName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -418,6 +424,9 @@ namespace Moda.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("CouponId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<double>("DeliveryCost")
                         .HasColumnType("float");
 
@@ -438,28 +447,9 @@ namespace Moda.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.OrderCoupon", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CouponId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("CouponId");
 
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderCoupons");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.OrderDetail", b =>
@@ -656,7 +646,7 @@ namespace Moda.BackEnd.Domain.Migrations
 
                     b.HasIndex("UpdateBy");
 
-                    b.ToTable("Ratings");
+                    b.ToTable("Rating");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.Shop", b =>
@@ -855,26 +845,15 @@ namespace Moda.BackEnd.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Account");
-                });
-
-            modelBuilder.Entity("Moda.BackEnd.Domain.Models.OrderCoupon", b =>
-                {
                     b.HasOne("Moda.BackEnd.Domain.Models.Coupon", "Coupon")
                         .WithMany()
                         .HasForeignKey("CouponId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Moda.Backend.Domain.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Account");
 
                     b.Navigation("Coupon");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Moda.Backend.Domain.Models.OrderDetail", b =>

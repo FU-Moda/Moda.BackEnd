@@ -33,6 +33,8 @@ namespace Moda.BackEnd.API.Installers
             services.AddScoped<IResponseCacheService, ResponseCacheService>();
             services.AddScoped<IOptionPackageService, OptionShopPackageService>();
             services.AddScoped<IResponseCacheService, ResponseCacheService>();
+            services.AddScoped<IConfigurationService, ConfigurationService>();
+
         }
     }
 }

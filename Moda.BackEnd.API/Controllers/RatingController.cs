@@ -7,7 +7,7 @@ using Moda.BackEnd.Common.DTO.Response;
 
 namespace Moda.BackEnd.API.Controllers
 {
-    [Route("api/rating")]
+    [Route("rating")]
     [ApiController]
     public class RatingController : ControllerBase
     {
@@ -36,6 +36,13 @@ namespace Moda.BackEnd.API.Controllers
         public async Task<AppActionResult> DeleteRating(Guid Id)
         {
             return await _service.DeleteRating(Id);
+        }
+
+        [RemoveCacheAtrribute("rating")]
+        [HttpGet("remove-cache")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
         }
     }
 }

@@ -245,7 +245,7 @@ namespace Moda.BackEnd.Application.Services
             }
             catch (Exception ex)
             {
-
+                result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
         }

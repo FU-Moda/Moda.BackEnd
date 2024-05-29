@@ -1,6 +1,7 @@
 ﻿using Moda.Backend.Domain.Models;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
+using Moda.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +21,6 @@ namespace Moda.BackEnd.Application.IServices
         Task<AppActionResult> GetProductByFilter(ProductFilter productFilter, int pageNumber, int pageSize);
         Task<AppActionResult> GetProductStockByProductId(Guid productId, int pageNumber, int pageSize);
         Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber, int pageSize);
+        Task<AppActionResult> UpdateProductStatus(Guid productId, ProductStatus productStatus);
     }
 }
