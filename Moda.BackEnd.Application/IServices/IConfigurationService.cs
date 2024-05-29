@@ -1,4 +1,5 @@
-﻿using Moda.BackEnd.Common.DTO.Response;
+﻿using Moda.BackEnd.Common.DTO.Request;
+using Moda.BackEnd.Common.DTO.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace Moda.BackEnd.Application.IServices
     public interface IConfigurationService
     {
         Task<AppActionResult> GetAllConfiguration(int pageNumber, int pageSize);
-        Task<AppActionResult> UpdateConfiguration(Guid configurationId);
+        Task<AppActionResult> UpdateConfiguration(ConfigurationDto configurationDto);
     }
 }

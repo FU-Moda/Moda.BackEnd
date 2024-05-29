@@ -9,6 +9,7 @@ namespace Moda.BackEnd.Domain.Enum
     public enum OptionPackagePriority
     {
         NONE,
-
+        IMPORTANT,
+        CRITICAL
     }
 }

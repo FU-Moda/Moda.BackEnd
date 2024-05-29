@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Moda.BackEnd.Application.IRepositories;
 using Moda.BackEnd.Application.IServices;
+using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
 using Moda.BackEnd.Domain.Models;
 using System;
@@ -41,17 +42,25 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public Task<AppActionResult> UpdateConfiguration()
+        public async Task<AppActionResult> UpdateConfiguration(ConfigurationDto configurationDto)
         {
             var result = new AppActionResult();
             try
             {
-
+                var configurationDb = await _repository.GetByExpression(p => p!.Name == configurationDto.Name);
+                if (configurationDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Cấu hình này không tồn tại");
+                }
+                configurationDb!.PreValue = configurationDto.PreValue;   
+                configurationDb.ActiveValue = configurationDto.ActiveValue;
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+            return result;
         }
     }
 }

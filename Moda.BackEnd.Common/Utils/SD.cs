@@ -70,7 +70,17 @@ namespace Moda.BackEnd.Common.Utils
 
         public class ConfigName
         {
-            public static string CONFIG_NAME = "PHẦN TRĂM HOA HỒNG";
+            public static string STANDARD_CONFIG = "PHẦN TRĂM HOA HỒNG GÓI CƠ BẢN";
+            public static string MEDIUM_CONFIG = "PHẦN TRĂM HOA HỒNG GÓI TẦM TRUNG";
+            public static string PREMIUM_CONFIG = "PHẦN TRĂM HOA HỒNG GÓI CAO CẤP";
+
+        }
+        public class ShopPackageName
+        {
+            public static string STANDARD_PACKAGE = "Gói cơ bản";
+            public static string MEDIUM_PACKAGE = "Gói tầm trung";
+            public static string PREMIUM_PACKAGE = "Gói cao cấp";
+
         }
         public class ResponseMessage
         {

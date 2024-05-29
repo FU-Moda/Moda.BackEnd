@@ -16,7 +16,7 @@ namespace Moda.BackEnd.Domain.Models
         public DateTime Duration { get; set; }
         public string Description { get; set; } = null!;
         public OptionPackageStatus Status { get; set; }
-        public int Priority { get; set; }   
+        public OptionPackagePriority Priority { get; set; }   
         public bool IsDashboardAvailable { get; set; }  
         public bool IsBannerAvailable { get; set; } 
     }

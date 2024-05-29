@@ -39,12 +39,12 @@ namespace Moda.BackEnd.Application.Services
             {
                 try
                 {
+                    var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
                     var accountRepository = Resolve<IRepository<Account>>();
                     var productStockRepository = Resolve<IRepository<ProductStock>>();
                     var configRepository = Resolve<IRepository<Configuration>>();
                     var affiliateRepository = Resolve<IRepository<Affiliate>>();
                     var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
-                    var configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.CONFIG_NAME);
                     if (accountDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Tài khoản với {orderRequest.AccountId} không tồn tại");
@@ -60,11 +60,7 @@ namespace Moda.BackEnd.Application.Services
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
                     }
-                    if (configDb == null)
-                    {
-                        result = BuildAppActionResultError(result, "Không tìm thấy số phần trăm hoa hồng");
-                    }
-
+           
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -74,7 +70,8 @@ namespace Moda.BackEnd.Application.Services
                         PhoneNumber = accountDb!.PhoneNumber!,
                         Status = Domain.Enum.OrderStatus.PENDING,
                         DeliveryCost = 0,
-                        Total = 0
+                        Total = 0,
+                        CouponId = orderRequest.CouponId,
                     };
 
                     double total = 0;
@@ -98,8 +95,36 @@ namespace Moda.BackEnd.Application.Services
 
                         total += productStock.Price * item.Quantity;
                         await _orderDetailRepository.Insert(orderDetail);
+
+                        var configDb = new Configuration();
+                        var packageOfShop = await shopPackageRepository!.GetByExpression(p => p.ShopId == productStock.Product!.ShopId, p => p.OptionPackageHistory.OptionPackage!);
+                        if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.STANDARD_CONFIG);
+                        }
+                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.MEDIUM_CONFIG);
+                        }
+                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.PREMIUM_CONFIG);
+                        }
+
+                        order.Total = total;
+
+                        var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
+
+                        var affiliate = new Affiliate
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderDate = order.OrderTime,
+                            Profit = order.Total * percentOfAffiliate,
+                            OrderId = order.Id
+                        };
+                        await affiliateRepository!.Insert(affiliate);
                     }
-                    order.Total = total;
+
                     if (order.Total > 250000)
                     {
                         order.DeliveryCost = 0;
@@ -108,24 +133,11 @@ namespace Moda.BackEnd.Application.Services
                     {
                         order.DeliveryCost = 30000;
                     }
-
-                    var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
-
-                    var affiliate = new Affiliate
-                    {
-                        Id = Guid.NewGuid(),
-                        OrderDate = order.OrderTime,
-                        Profit = order.Total * percentOfAffiliate,
-                        OrderId = order.Id
-                    };
-
                     if (!BuildAppActionResultIsError(result))
                     {
                         await _orderRepository.Insert(order);
-                        await affiliateRepository!.Insert(affiliate);
                         await _unitOfWork.SaveChangesAsync();
                         scope.Complete();
-                        result.Messages.Add("Tạo Order thành công");
                     }
                 }
                 catch (Exception ex)
@@ -143,12 +155,12 @@ namespace Moda.BackEnd.Application.Services
             {
                 try
                 {
+                    var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
                     var accountRepository = Resolve<IRepository<Account>>();
                     var productStockRepository = Resolve<IRepository<ProductStock>>();
                     var configRepository = Resolve<IRepository<Configuration>>();
                     var affiliateRepository = Resolve<IRepository<Affiliate>>();
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                    var configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.CONFIG_NAME);
                     var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
                     if (accountDb == null)
                     {
@@ -165,10 +177,7 @@ namespace Moda.BackEnd.Application.Services
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
                     }
-                    if (configDb == null)
-                    {
-                        result = BuildAppActionResultError(result, "Không tìm thấy số phần trăm hoa hồng");
-                    }
+
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -178,7 +187,8 @@ namespace Moda.BackEnd.Application.Services
                         PhoneNumber = accountDb!.PhoneNumber!,
                         Status = Domain.Enum.OrderStatus.PENDING,
                         DeliveryCost = 0,
-                        Total = 0
+                        Total = 0,
+                        CouponId = orderRequest.CouponId,   
                     };
 
                     double total = 0;
@@ -203,18 +213,35 @@ namespace Moda.BackEnd.Application.Services
 
                         total += productStock.Price * item.Quantity;
                         await _orderDetailRepository.Insert(orderDetail);
+
+                        var configDb = new Configuration();
+                        var packageOfShop = await shopPackageRepository!.GetByExpression(p => p.ShopId == productStock.Product!.ShopId, p => p.OptionPackageHistory.OptionPackage!);
+                        if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.STANDARD_CONFIG);
+                        }
+                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.MEDIUM_CONFIG);
+                        }
+                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
+                        {
+                            configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.PREMIUM_CONFIG);
+                        }
+
+                        order.Total = total;
+
+                        var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
+
+                        var affiliate = new Affiliate
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderDate = order.OrderTime,
+                            Profit = order.Total * percentOfAffiliate,
+                            OrderId = order.Id
+                        };
+                        await affiliateRepository!.Insert(affiliate);
                     }
-                    order.Total = total;
-
-                    var percentOfAffiliate = Convert.ToDouble(configDb!.ActiveValue);
-
-                    var affiliate = new Affiliate
-                    {
-                        Id = Guid.NewGuid(),
-                        OrderDate = order.OrderTime,
-                        Profit = order.Total * percentOfAffiliate,
-                        OrderId = order.Id
-                    };
 
                     if (order.Total > 250000)
                     {
@@ -227,7 +254,6 @@ namespace Moda.BackEnd.Application.Services
                     if (!BuildAppActionResultIsError(result))
                     {
                         await _orderRepository.Insert(order);
-                        await affiliateRepository!.Insert(affiliate);
                         await _unitOfWork.SaveChangesAsync();
                         scope.Complete();
                     }
@@ -247,7 +273,7 @@ namespace Moda.BackEnd.Application.Services
             }
             return result;
         }
-      
+
         public async Task<AppActionResult> UpdatesSucessStatus(Guid orderId)
         {
             AppActionResult result = new AppActionResult();
