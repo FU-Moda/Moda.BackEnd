@@ -116,7 +116,7 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 if (await _accountRepository.GetByExpression(r => r!.UserName == signUpRequest.Email) != null)
-                    result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
+                    result = BuildAppActionResultError(result, "Email hoặc username đã tồn tại!");
 
                 if (!BuildAppActionResultIsError(result))
                 {
@@ -169,7 +169,7 @@ namespace Moda.BackEnd.Application.Services
                 try
                 {
                     if (await _accountRepository.GetByExpression(r => r!.UserName == signUpShopRequestDto.Email) != null)
-                        result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
+                        result = BuildAppActionResultError(result, "Email hoặc username đã tồn tại!");
                     if (!BuildAppActionResultIsError(result))
                     {
                         var emailService = Resolve<IEmailService>();

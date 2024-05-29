@@ -29,8 +29,10 @@ namespace Moda.BackEnd.API.Installers
             services.AddScoped<ICouponService, CouponService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
-            services.AddScoped<IWarehouseService, WarehouseService>();
             services.AddScoped<IDashBoardService, DashboardService>();
+            services.AddScoped<IResponseCacheService, ResponseCacheService>();
+            services.AddScoped<IOptionPackageService, OptionShopPackageService>();
+            services.AddScoped<IResponseCacheService, ResponseCacheService>();
         }
     }
 }

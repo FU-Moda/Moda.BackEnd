@@ -15,5 +15,6 @@ namespace Moda.BackEnd.Application.IServices
         public Task<AppActionResult> AddShop(CreateShopDto dto);
         public Task<AppActionResult> UpdateShop(UpdateShopDto dto);
         public Task<AppActionResult> GetShopByAccountId(string Id);
+        public Task<AppActionResult> GetShopAffiliateByShopId(Guid shopId, int pageNumber, int pageSize);
     }
 }

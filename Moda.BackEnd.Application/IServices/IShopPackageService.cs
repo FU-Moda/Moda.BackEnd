@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace Moda.BackEnd.Application.IServices
 {
-    public interface IWarehouseService
+    public interface IShopPackageService
     {
-        Task<AppActionResult> GetAllWarehouse(int pageNumber, int pageSize);
     }
 }
