@@ -51,5 +51,12 @@ namespace Moda.BackEnd.API.Controllers
         {
             return await _optionPackageService.DeleteOptionPackage(packageId);      
         }
+
+        [RemoveCacheAtrribute("option-package")]
+        [HttpGet("option-package")]
+        public IActionResult RemoveCache()
+        {
+            return Ok();
+        }
     }
 }

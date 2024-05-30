@@ -33,6 +33,7 @@ namespace Moda.BackEnd.Infrastructure.Mapping
              .ForMember(desc => desc.PreValue, act => act.MapFrom(src => src.PreValue))
              .ForMember(desc => desc.ActiveValue, act => act.MapFrom(src => src.ActiveValue))
              .ForMember(desc => desc.Name, act => act.MapFrom(src => src.Name))
+             .ForMember(desc => desc.ActiveDate, act => act.MapFrom(src => src.ActiveDate))
              .ReverseMap();
 
                 config.CreateMap<Product, ProductDto>()
