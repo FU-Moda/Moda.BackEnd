@@ -406,8 +406,8 @@ namespace Moda.BackEnd.Application.Services
                 double total = 0;
                 OrderProfitListResponse data = new OrderProfitListResponse();
                 var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => (shopId == null || p.ProductStock!.Product!.ShopId == shopId)
-                                                                                        && p.Order.OrderTime >= startDate
-                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order.Account);
+                                                                                        && p.Order!.OrderTime >= startDate
+                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!.Account!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
                     List<Backend.Domain.Models.Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
