@@ -50,6 +50,31 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId)
+        {
+            AppActionResult result = new AppActionResult();
+            var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
+            var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
+            try
+            {
+                var shopDb = await _repository.GetByExpression(p => p!.Id == shopId, p => p.Account);
+                if (shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Shop không tồn tại");
+                }
+                var optionPackageDb = await optionPackageRepository!.GetByExpression(p => p!.OptionPackageId == optionPackageId);
+                if (optionPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Gói dịch vụ không tồn tại");
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetAllShop(int pageNumber, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -78,7 +103,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
                 }
-                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, null, false, p => p.Order!);
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, p => p.Order!.OrderTime, false, p => p.Order!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
                     foreach (var item in orderOfShop.Items)
