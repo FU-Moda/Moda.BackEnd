@@ -138,7 +138,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
                 }
-                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, p => p.Order!.OrderTime, false, p => p.Order!);
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, p => p.Order!.OrderTime, false, p => p.Order!.Account!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
                     foreach (var item in orderOfShop.Items)
