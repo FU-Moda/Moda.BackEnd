@@ -164,6 +164,45 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetTotalAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
+        {
+            var result = new AppActionResult();
+            var affiliateRepository = Resolve<IRepository<Affiliate>>();
+            var orderDetailRepository = Resolve<IRepository<OrderDetail>>();
+            var shopRepository = Resolve<IRepository<Shop>>();
+            var affiliateList = new List<Affiliate>();
+            try
+            {
+
+                if(shopId != null)
+                {
+                    var shopDb = await shopRepository.GetById(shopId);
+                    if (shopDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
+                        return result;
+                    }
+                }
+                double total = 0;
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => (shopId == null || p.ProductStock!.Product!.ShopId == shopId) 
+                                                                                        && p.Order.OrderTime >= startDate  
+                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!);
+                if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
+                {
+                    List<Guid> orderIds = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.OrderId).ToList();
+                    var affiliateDb = await affiliateRepository!.GetAllDataByExpression(a => orderIds.Contains(a.OrderId), 0, 0, null, false, null);
+                    affiliateDb.Items.ForEach(a => total += a.Profit);
+                }
+
+                result.Result = total;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetShopByAccountId(string Id)
         {
             AppActionResult result = new AppActionResult();
@@ -337,6 +376,57 @@ namespace Moda.BackEnd.Application.Services
                 shopDb.Description = dto.Description;
                 await _repository.Update(shopDb);
                 await _unitOfWork.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
+        {
+            var result = new AppActionResult();
+            var affiliateRepository = Resolve<IRepository<Affiliate>>();
+            var orderDetailRepository = Resolve<IRepository<OrderDetail>>();
+            var shopRepository = Resolve<IRepository<Shop>>();
+            var affiliateList = new List<Affiliate>();
+            try
+            {
+
+                if (shopId != null)
+                {
+                    var shopDb = await shopRepository.GetById(shopId);
+                    if (shopDb == null)
+                    {
+                        result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
+                        return result;
+                    }
+                }
+                double total = 0;
+                OrderProfitListResponse data = new OrderProfitListResponse();
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => (shopId == null || p.ProductStock!.Product!.ShopId == shopId)
+                                                                                        && p.Order.OrderTime >= startDate
+                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!);
+                if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
+                {
+                    List<Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
+                    foreach (var item in orderDb)
+                    {
+                        var affiliateDb = await affiliateRepository!.GetByExpression(a => item.Id == a.OrderId, null);
+                        if(affiliateDb != null)
+                        {
+                            data.orderProfitResponses.Add(new OrderProfitResponse()
+                            {
+                                Profit = item.Total - affiliateDb.Profit,
+                                Order = item
+                            });
+                            total += item.Total - affiliateDb.Profit;
+                        } 
+                    }
+                }
+                data.TotalProfit = total;
+                result.Result = data;
             }
             catch (Exception ex)
             {

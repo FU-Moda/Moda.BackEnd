@@ -1,5 +1,8 @@
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Moda.BackEnd.API.Attributes;
 using Moda.BackEnd.API.Installers;
+using Moda.BackEnd.Application.Services;
 using Moda.BackEnd.Domain.Data;
 using Moda.BackEnd.Infrastructure.ServerHub;
 
@@ -39,6 +42,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>(nameof(NotificationHub));
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new DashboardNoAuthorizationFilter() }
+});
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    var workerService = serviceProvider.GetRequiredService<WorkerService>();
+    workerService.Start();
+}
 app.Run();
 
 void ApplyMigration()
