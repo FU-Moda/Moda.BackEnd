@@ -24,5 +24,6 @@ namespace Moda.BackEnd.Application.IServices
         public Task<AppActionResult> GetShopPackageByStatus(ShopPackageStatus shopPackageStatus, int pageNumber, int pageSize);
         public Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId, HttpContext context);
         public Task<AppActionResult> UpdatePackageStatusForShop(Guid shopId, ShopPackageStatus shopPackageStatus);
+        public Task<AppActionResult> CheckShopPackageSubscription(Guid shopId);
     }
 }
