@@ -173,8 +173,8 @@ namespace Moda.BackEnd.Application.Services
                 optionPackageDb.PackageName = optionPackageHistory.OptionPackageDto.PackageName;
                 optionPackageDb.Description = optionPackageHistory.OptionPackageDto.Description;
                 optionPackageDb.Duration = optionPackageHistory.OptionPackageDto.Duration;
-                optionPackageDb.IsBannerAvailable = optionPackageDb.IsBannerAvailable;
-                optionPackageDb.IsDashboardAvailable = optionPackageDb.IsDashboardAvailable;
+                optionPackageDb.IsBannerAvailable = optionPackageHistory.OptionPackageDto.IsBannerAvailable;
+                optionPackageDb.IsDashboardAvailable = optionPackageHistory.OptionPackageDto.IsDashboardAvailable;
                 var latestHistory = await _optionPackageHistory!.GetByExpression(h => h!.OptionPackageId == packageId);
                 if (latestHistory != null)
                 {
