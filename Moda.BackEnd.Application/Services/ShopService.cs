@@ -143,7 +143,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     foreach (var item in orderOfShop.Items)
                     {
-                        var affiliateOfShop = await affiliateRepository!.GetByExpression(p => p!.OrderId == item.OrderId);
+                        var affiliateOfShop = await affiliateRepository!.GetByExpression(p => p!.OrderId == item.OrderId, p => p.Order!.Account!);
                         if (affiliateOfShop != null)
                         {
                             affiliateList.Add(affiliateOfShop);
