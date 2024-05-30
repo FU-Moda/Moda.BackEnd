@@ -95,6 +95,7 @@ namespace Moda.BackEnd.API.Controllers
         public async Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
         {
             return await _service.GetTotalOrderDetailAffiliate(shopId, startDate, endDate);
+        }
 
         [RemoveCacheAtrribute("shop")]
         [HttpGet("remove-cache")]

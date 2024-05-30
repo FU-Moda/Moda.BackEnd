@@ -410,7 +410,7 @@ namespace Moda.BackEnd.Application.Services
                                                                                         && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
-                    List<Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
+                    List<Backend.Domain.Models.Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
                     foreach (var item in orderDb)
                     {
                         var affiliateDb = await affiliateRepository!.GetByExpression(a => item.Id == a.OrderId, null);
