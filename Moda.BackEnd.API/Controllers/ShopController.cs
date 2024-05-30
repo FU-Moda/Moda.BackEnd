@@ -4,6 +4,7 @@ using Moda.BackEnd.API.Middlewares;
 using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
+using Moda.BackEnd.Domain.Enum;
 
 namespace Moda.BackEnd.API.Controllers
 {
@@ -31,7 +32,7 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetShopById(Id);
         }
 
-        [HttpPost("update-shop")]
+        [HttpPut("update-shop")]
         [RemoveCacheAtrribute("shop")]
         public async Task<AppActionResult> UpdateShop([FromBody] UpdateShopDto dto)
         {
@@ -65,10 +66,24 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetShopWithBanner(pageNumber, pageSize);
         }
 
+        [HttpGet("get-shop-package-by-status/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetShopPackageByStatus(ShopPackageStatus shopPackageStatus, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _service.GetShopPackageByStatus(shopPackageStatus, pageNumber, pageSize);
+        }
+
         [HttpPost("assign-package-for-shop")]
+        [RemoveCacheAtrribute("shop")]
         public async Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId)
         {
             return await _service.AssignPackageForShop(shopId, optionPackageId, HttpContext);
+        }
+
+        [HttpPut("update-package-status-for-shop/{shopId}")]
+        [RemoveCacheAtrribute("shop")]
+        public async Task<AppActionResult> UpdatePackageStatusForShop(Guid shopId, ShopPackageStatus shopPackageStatus)
+        {
+            return await _service.UpdatePackageStatusForShop(shopId, shopPackageStatus);   
         }
 
         [RemoveCacheAtrribute("shop")]

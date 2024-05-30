@@ -44,6 +44,7 @@ namespace Moda.BackEnd.Application.Services
                     var productStockRepository = Resolve<IRepository<ProductStock>>();
                     var configRepository = Resolve<IRepository<Configuration>>();
                     var affiliateRepository = Resolve<IRepository<Affiliate>>();
+                    var couponRepository = Resolve<IRepository<Coupon>>();
                     var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
                     if (accountDb == null)
                     {
@@ -60,7 +61,12 @@ namespace Moda.BackEnd.Application.Services
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
                     }
-           
+                    var couponDb = await couponRepository!.GetByExpression(p => p.Id == orderRequest.CouponId);
+                    if (couponDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Mã giảm giá này không tồn tại");
+                    }
+
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -75,6 +81,8 @@ namespace Moda.BackEnd.Application.Services
                     };
 
                     double total = 0;
+                    double discount = 0;
+                    var discountPercent = Convert.ToDouble(couponDb!.Percent);
                     foreach (var item in orderRequest.ProductStockDtos)
                     {
                         var productStock = await productStockRepository!.GetByExpression(p => p!.Id == item.Id && p.Quantity >= item.Quantity, p => p.Product!);
@@ -93,7 +101,10 @@ namespace Moda.BackEnd.Application.Services
                         productStock.Quantity -= item.Quantity;
                         await productStockRepository.Update(productStock);
 
-                        total += productStock.Price * item.Quantity;
+
+                        discount = (total * discountPercent) / 100;
+
+                        total += (productStock.Price * item.Quantity) - discount;
                         await _orderDetailRepository.Insert(orderDetail);
 
                         var configDb = new Configuration();
@@ -161,6 +172,7 @@ namespace Moda.BackEnd.Application.Services
                     var configRepository = Resolve<IRepository<Configuration>>();
                     var affiliateRepository = Resolve<IRepository<Affiliate>>();
                     var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                    var couponRepository = Resolve<IRepository<Coupon>>();
                     var accountDb = await accountRepository!.GetByExpression(p => p!.Id == orderRequest.AccountId);
                     if (accountDb == null)
                     {
@@ -177,7 +189,11 @@ namespace Moda.BackEnd.Application.Services
                         result = BuildAppActionResultError(result, "Số điện thoại của tài khoản không được để trống");
                         return result;
                     }
-
+                    var couponDb = await couponRepository!.GetByExpression(p => p.Id == orderRequest.CouponId);
+                    if (couponDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Mã giảm giá này không tồn tại");
+                    }
                     var order = new Order
                     {
                         Id = Guid.NewGuid(),
@@ -192,7 +208,8 @@ namespace Moda.BackEnd.Application.Services
                     };
 
                     double total = 0;
-
+                    double discount = 0;
+                    var discountPercent = Convert.ToDouble(couponDb.Percent);
                     foreach (var item in orderRequest.ProductStockDtos)
                     {
                         var productStock = await productStockRepository!.GetByExpression(p => p!.Id == item.Id && p.Quantity >= item.Quantity, p => p.Product!);
@@ -211,7 +228,9 @@ namespace Moda.BackEnd.Application.Services
                         productStock.Quantity -= item.Quantity;
                         await productStockRepository.Update(productStock);
 
-                        total += productStock.Price * item.Quantity;
+
+                        discount = (total * discountPercent) / 100;
+                        total += (productStock.Price * item.Quantity) - discount;
                         await _orderDetailRepository.Insert(orderDetail);
 
                         var configDb = new Configuration();

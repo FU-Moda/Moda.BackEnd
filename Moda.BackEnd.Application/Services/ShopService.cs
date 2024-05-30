@@ -17,6 +17,7 @@ using Moda.BackEnd.Application.Payment.PaymentRequest;
 using StackExchange.Redis;
 using Moda.BackEnd.Application.Payment.PaymentService;
 using Microsoft.AspNetCore.Http;
+using Moda.BackEnd.Domain.Enum;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -224,6 +225,21 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetShopPackageByStatus(ShopPackageStatus shopPackageStatus, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                result.Result = await shopPackageRepository!.GetAllDataByExpression(p => p.ShopPackageStatus == shopPackageStatus, pageNumber, pageSize, null, false , p => p.Shop, p => p.OptionPackageHistory.OptionPackage);
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -271,6 +287,37 @@ namespace Moda.BackEnd.Application.Services
             }
             return result;
 
+        }
+
+        public async Task<AppActionResult> UpdatePackageStatusForShop(Guid shopId, ShopPackageStatus shopPackageStatus)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
+                var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                var shopDb = await _repository.GetByExpression(p => p!.Id == shopId, p => p.Account);
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                if (shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Shop không tồn tại");
+                }
+                var shopPackageDb = await shopPackageRepository!.GetByExpression(p => p.ShopId == shopId);
+                if(shopPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Shop với {shopId} chưa mua gói nào ");
+                }
+                shopPackageDb!.ShopPackageStatus = shopPackageStatus;
+                await _unitOfWork.SaveChangesAsync();
+                result.Result = shopPackageDb;
+                result.Messages.Add("Update thành công");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> UpdateShop(UpdateShopDto dto)
