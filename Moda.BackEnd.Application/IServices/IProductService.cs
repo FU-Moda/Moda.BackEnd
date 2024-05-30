@@ -21,6 +21,7 @@ namespace Moda.BackEnd.Application.IServices
         Task<AppActionResult> GetProductByFilter(ProductFilter productFilter, int pageNumber, int pageSize);
         Task<AppActionResult> GetProductStockByProductId(Guid productId, int pageNumber, int pageSize);
         Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber, int pageSize);
+        Task<AppActionResult> GetProductByStatus(ProductStatus productStatus, int pageNumber, int pageSize);
         Task<AppActionResult> UpdateProductStatus(Guid productId, ProductStatus productStatus);
     }
 }

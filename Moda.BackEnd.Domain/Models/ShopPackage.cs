@@ -1,4 +1,5 @@
 ﻿using Moda.Backend.Domain.Models;
+using Moda.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,5 +22,6 @@ namespace Moda.BackEnd.Domain.Models
         public Guid OptionPackageHistoryId;
         [ForeignKey(nameof(OptionPackageHistoryId))]
         public OptionPackageHistory OptionPackageHistory { get; set; } = null!;
+        public ShopPackageStatus ShopPackageStatus { get; set; }    
     }
 }

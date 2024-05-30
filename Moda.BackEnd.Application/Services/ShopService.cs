@@ -11,6 +11,13 @@ using System.Threading.Tasks;
 using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Domain.Models;
 using Moda.BackEnd.Common.Utils;
+using System.Transactions;
+using static System.Formats.Asn1.AsnWriter;
+using Moda.BackEnd.Application.Payment.PaymentRequest;
+using StackExchange.Redis;
+using Moda.BackEnd.Application.Payment.PaymentService;
+using Microsoft.AspNetCore.Http;
+using Moda.BackEnd.Domain.Enum;
 
 namespace Moda.BackEnd.Application.Services
 {
@@ -50,27 +57,55 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId)
+        public async Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId, HttpContext context)
         {
             AppActionResult result = new AppActionResult();
-            var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
-            var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
-            try
+          
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var shopDb = await _repository.GetByExpression(p => p!.Id == shopId, p => p.Account);
-                if (shopDb == null)
+                try
                 {
-                    result = BuildAppActionResultError(result, "Shop không tồn tại");
+                    var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
+                    var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
+                    var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                    var shopDb = await _repository.GetByExpression(p => p!.Id == shopId, p => p.Account);
+                    var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                    if (shopDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Shop không tồn tại");
+                    }
+                    var optionPackageDb = await optionPackageRepository!.GetByExpression(p => p!.OptionPackageId == optionPackageId);
+                    if (optionPackageDb == null)
+                    {
+                        result = BuildAppActionResultError(result, "Gói dịch vụ không tồn tại");
+                    }
+                    var optionPackageHistoryDb = await optionPackageHistoryRepository!.GetByExpression(p => p!.OptionPackageId == optionPackageDb!.OptionPackageId);
+                    var shopPackageDb = new ShopPackage
+                    {
+                        Id = Guid.NewGuid(),
+                        ShopId = shopId,
+                        OptionPackageHistoryId = optionPackageHistoryDb!.OptionPackageHistoryId,
+                        ShopPackageStatus = Domain.Enum.ShopPackageStatus.PENDING,
+                    };
+                    if (!BuildAppActionResultIsError(result))
+                    {
+                        await shopPackageRepository!.Insert(shopPackageDb);
+                        await _unitOfWork.SaveChangesAsync();
+                        scope.Complete();
+                    }
+                    var payment = new PaymentInformationRequest
+                    {
+                        AccountID = shopPackageDb!.Shop.AccountId,
+                        Amount = (double)shopPackageDb.OptionPackageHistory.PackagePrice,
+                        CustomerName = $"{shopPackageDb!.Shop.Account!.FirstName} {shopPackageDb!.Shop.Account.LastName}",
+                        OrderID = shopPackageDb.Id.ToString(),
+                    };
+                    result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
                 }
-                var optionPackageDb = await optionPackageRepository!.GetByExpression(p => p!.OptionPackageId == optionPackageId);
-                if (optionPackageDb == null)
+                catch (Exception ex)
                 {
-                    result = BuildAppActionResultError(result, "Gói dịch vụ không tồn tại");
+                    result = BuildAppActionResultError(result, ex.Message);
                 }
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
         }
@@ -103,12 +138,12 @@ namespace Moda.BackEnd.Application.Services
                 {
                     result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
                 }
-                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, p => p.Order!.OrderTime, false, p => p.Order!);
+                var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock!.Product!.ShopId == shopId, pageNumber, pageSize, p => p.Order!.OrderTime, false, p => p.Order!.Account!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
                     foreach (var item in orderOfShop.Items)
                     {
-                        var affiliateOfShop = await affiliateRepository!.GetByExpression(p => p!.OrderId == item.OrderId);
+                        var affiliateOfShop = await affiliateRepository!.GetByExpression(p => p!.OrderId == item.OrderId, p => p.Order!.Account!);
                         if (affiliateOfShop != null)
                         {
                             affiliateList.Add(affiliateOfShop);
@@ -141,7 +176,7 @@ namespace Moda.BackEnd.Application.Services
 
                 if(shopId != null)
                 {
-                    var shopDb = await shopRepository.GetById(shopId);
+                    var shopDb = await shopRepository!.GetById(shopId);
                     if (shopDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
@@ -229,6 +264,21 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetShopPackageByStatus(ShopPackageStatus shopPackageStatus, int pageNumber, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                result.Result = await shopPackageRepository!.GetAllDataByExpression(p => p.ShopPackageStatus == shopPackageStatus, pageNumber, pageSize, null, false , p => p.Shop, p => p.OptionPackageHistory.OptionPackage);
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -237,15 +287,16 @@ namespace Moda.BackEnd.Application.Services
                 var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
                 var productRepository = Resolve<IRepository<Product>>();
                 var staticFileRepository = Resolve<IRepository<StaticFile>>();
-                var shopWithBanner = await shopPackageRepository!.GetAllDataByExpression(s => s.OptionPackageHistory.OptionPackage.IsBannerAvailable,0,0, null, false, s => s.Shop);
-                if(shopWithBanner.Items != null && shopWithBanner.Items.Count > 0) {
-                    var shopDb = shopWithBanner.Items.Select(s => s.Shop).ToList(); 
-                    List < ShopDto > data = new List<ShopDto>();
-                    foreach(var shop in shopDb)
+                var shopWithBanner = await shopPackageRepository!.GetAllDataByExpression(s => s.OptionPackageHistory.OptionPackage.IsBannerAvailable, 0, 0, null, false, s => s.Shop);
+                if (shopWithBanner.Items != null && shopWithBanner.Items.Count > 0)
+                {
+                    var shopDb = shopWithBanner.Items.Select(s => s.Shop).ToList();
+                    List<ShopDto> data = new List<ShopDto>();
+                    foreach (var shop in shopDb)
                     {
                         var productDb = await productRepository!.GetAllDataByExpression(p => p.ShopId == shop.Id, 0, 0, null, false, null);
                         List<ProductResponseDto> productResponse = new List<ProductResponseDto>();
-                        foreach(var product in productDb.Items!)
+                        foreach (var product in productDb.Items!)
                         {
                             var img = await staticFileRepository!.GetAllDataByExpression(s => s.ProductId == product.Id, 0, 0, null, false, null);
                             productResponse.Add(
@@ -268,12 +319,44 @@ namespace Moda.BackEnd.Application.Services
                         TotalPages = data.Count() / pageSize
                     };
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
 
+        }
+
+        public async Task<AppActionResult> UpdatePackageStatusForShop(Guid shopId, ShopPackageStatus shopPackageStatus)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
+                var optionPackageHistoryRepository = Resolve<IRepository<OptionPackageHistory>>();
+                var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+                var shopDb = await _repository.GetByExpression(p => p!.Id == shopId, p => p.Account);
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                if (shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, "Shop không tồn tại");
+                }
+                var shopPackageDb = await shopPackageRepository!.GetByExpression(p => p.ShopId == shopId);
+                if(shopPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Shop với {shopId} chưa mua gói nào ");
+                }
+                shopPackageDb!.ShopPackageStatus = shopPackageStatus;
+                await _unitOfWork.SaveChangesAsync();
+                result.Result = shopPackageDb;
+                result.Messages.Add("Update thành công");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> UpdateShop(UpdateShopDto dto)
@@ -323,11 +406,11 @@ namespace Moda.BackEnd.Application.Services
                 double total = 0;
                 OrderProfitListResponse data = new OrderProfitListResponse();
                 var orderOfShop = await orderDetailRepository!.GetAllDataByExpression(p => (shopId == null || p.ProductStock!.Product!.ShopId == shopId)
-                                                                                        && p.Order.OrderTime >= startDate
-                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!);
+                                                                                        && p.Order!.OrderTime >= startDate
+                                                                                        && p.Order.OrderTime <= endDate, 0, 0, null, false, p => p.Order!.Account!);
                 if (orderOfShop!.Items!.Count > 0 && orderOfShop.Items != null)
                 {
-                    List<Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
+                    List<Backend.Domain.Models.Order> orderDb = orderOfShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList();
                     foreach (var item in orderDb)
                     {
                         var affiliateDb = await affiliateRepository!.GetByExpression(a => item.Id == a.OrderId, null);

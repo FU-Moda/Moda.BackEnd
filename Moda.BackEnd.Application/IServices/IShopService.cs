@@ -1,5 +1,7 @@
-﻿using Moda.BackEnd.Common.DTO.Request;
+﻿using Microsoft.AspNetCore.Http;
+using Moda.BackEnd.Common.DTO.Request;
 using Moda.BackEnd.Common.DTO.Response;
+using Moda.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,8 @@ namespace Moda.BackEnd.Application.IServices
         public Task<AppActionResult> GetTotalAffiliate(Guid? shopId, DateTime startDate, DateTime endDate);
         public Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate);
         public Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize);
-        public Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId);
+        public Task<AppActionResult> GetShopPackageByStatus(ShopPackageStatus shopPackageStatus, int pageNumber, int pageSize);
+        public Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId, HttpContext context);
+        public Task<AppActionResult> UpdatePackageStatusForShop(Guid shopId, ShopPackageStatus shopPackageStatus);
     }
 }
