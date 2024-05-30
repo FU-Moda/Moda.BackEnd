@@ -65,6 +65,12 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetShopWithBanner(pageNumber, pageSize);
         }
 
+        [HttpPost("assign-package-for-shop")]
+        public async Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId)
+        {
+            return await _service.AssignPackageForShop(shopId, optionPackageId, HttpContext);
+        }
+
         [RemoveCacheAtrribute("shop")]
         [HttpGet("remove-cache")]
         public IActionResult RemoveCache()

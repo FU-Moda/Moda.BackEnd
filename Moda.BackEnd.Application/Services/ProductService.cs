@@ -312,6 +312,44 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetProductByStatus(ProductStatus productStatus, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            var staticFileRepository = Resolve<IRepository<StaticFile>>();
+            var productStockRepository = Resolve<IRepository<ProductStock>>();
+            var productResponseList = new List<ProductResponse>();
+            try
+            {
+                var productList = await _productRepository.GetAllDataByExpression(p => p.Status == productStatus, pageNumber, pageSize, null, false, p => p.Shop!);
+                if (productList!.Items!.Count > 0 && productList.Items != null)
+                {
+                    foreach (var item in productList.Items)
+                    {
+                        var productResponse = new ProductResponse();
+                        var productStockDb = await productStockRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, null);
+                        var staticFileDb = await staticFileRepository!.GetAllDataByExpression(p => p.ProductId == item.Id, 0, 0, null, false, p => p.Rating!);
+                        if (productStockDb!.Items!.Count > 0 && productStockDb.Items != null || staticFileDb!.Items!.Count > 0 && staticFileDb.Items != null)
+                        {
+                            productResponse.Product = item;
+                            productResponse.StaticFile = staticFileDb!.Items!.ToList();
+                            productResponse.ProductStock = productStockDb!.Items!;
+                            productResponseList.Add(productResponse);
+                        }
+                    }
+                    result.Result = new PagedResult<ProductResponse>
+                    {
+                        Items = productResponseList,
+                        TotalPages = productList.TotalPages
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, $"Có lỗi xảy ra {ex.Message}");
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetProductRatingByProductId(Guid productId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();

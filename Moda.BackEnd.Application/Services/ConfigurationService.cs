@@ -54,6 +54,7 @@ namespace Moda.BackEnd.Application.Services
                 }
                 configurationDb!.PreValue = configurationDto.PreValue;   
                 configurationDb.ActiveValue = configurationDto.ActiveValue;
+                configurationDb.ActiveDate = configurationDto.ActiveDate;
                 await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)

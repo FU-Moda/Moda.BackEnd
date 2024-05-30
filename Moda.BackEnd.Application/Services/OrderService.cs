@@ -119,7 +119,7 @@ namespace Moda.BackEnd.Application.Services
                         {
                             Id = Guid.NewGuid(),
                             OrderDate = order.OrderTime,
-                            Profit = order.Total * percentOfAffiliate,
+                            Profit = (order.Total * percentOfAffiliate) / 100,
                             OrderId = order.Id
                         };
                         await affiliateRepository!.Insert(affiliate);
@@ -237,7 +237,7 @@ namespace Moda.BackEnd.Application.Services
                         {
                             Id = Guid.NewGuid(),
                             OrderDate = order.OrderTime,
-                            Profit = order.Total * percentOfAffiliate,
+                            Profit = (order.Total * percentOfAffiliate)/100,
                             OrderId = order.Id
                         };
                         await affiliateRepository!.Insert(affiliate);

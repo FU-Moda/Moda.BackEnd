@@ -39,6 +39,13 @@ namespace Moda.BackEnd.API.Controllers
             return await _productService.GetProductByShopId(shopId, pageNumber, pageSize);
         }
 
+        [HttpGet("get-product-by-status/{pageNumber}/{pageSize}")]
+        [CacheAttribute(259200)]
+        public async Task<AppActionResult> GetProductByStatus(ProductStatus productStatus, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _productService.GetProductByStatus(productStatus, pageNumber, pageSize);
+        }
+
         [HttpPost("get-product-by-filter/{pageNumber}/{pageSize}")]
         [CacheAttribute(259200)]
         public async Task<AppActionResult> GetProductByFilter(ProductFilter productFilter, int pageNumber = 1, int pageSize = 10)
