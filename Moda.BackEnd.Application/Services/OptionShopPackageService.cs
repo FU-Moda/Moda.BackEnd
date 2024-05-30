@@ -100,17 +100,20 @@ namespace Moda.BackEnd.Application.Services
                 if (optionPackagetDb == null)
                 {
                     result = BuildAppActionResultError(result, "Gói này không tìm thấy");
+                    return result; // Return early to avoid further processing
                 }
                 if (optionPackagetDb!.Items != null && optionPackagetDb.Items.Count > 0)
                 {
-                    var optionResponse = new OptionPackageResponse();       
                     foreach (var item in optionPackagetDb.Items)
                     {
                         var optionPackageHistoriesDb = await _optionPackageHistory.GetAllDataByExpression(p => p.OptionPackageId == item.OptionPackageId, 0, 0, null, false, p => p.OptionPackage);
                         if (optionPackageHistoriesDb.Items != null && optionPackageHistoriesDb.Items.Count > 0)
                         {
-                            optionResponse.OptionPackage = item;
-                            optionResponse.OptionPackageHistory = optionPackageHistoriesDb!.Items;
+                            var optionResponse = new OptionPackageResponse // Create a new instance here
+                            {
+                                OptionPackage = item,
+                                OptionPackageHistory = optionPackageHistoriesDb.Items
+                            };
                             listOptionPackageList.Add(optionResponse);
                         }
                     }
@@ -127,6 +130,7 @@ namespace Moda.BackEnd.Application.Services
             }
             return result;
         }
+
 
         public async Task<AppActionResult> GetOptionPackageById(Guid optionPackageId)
         {
