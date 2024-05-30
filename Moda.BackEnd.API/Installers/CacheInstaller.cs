@@ -1,4 +1,5 @@
-﻿using Moda.BackEnd.Application.IServices;
+﻿using AspNetCoreRateLimit.Redis;
+using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Application.Services;
 using Moda.BackEnd.Common.ConfigurationModel;
 using StackExchange.Redis;
@@ -22,6 +23,7 @@ namespace Moda.BackEnd.API.Installers
                 services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConfiguration.ConnectionString));
                 services.AddStackExchangeRedisCache(option => option.Configuration = redisConfiguration.ConnectionString);
                 services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+                services.AddResponseCaching();
             }
         }
     }

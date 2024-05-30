@@ -66,6 +66,7 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-total-affiliate")]
+        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetTotalAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
         {
             return await _service.GetTotalAffiliate(shopId, startDate, endDate);
