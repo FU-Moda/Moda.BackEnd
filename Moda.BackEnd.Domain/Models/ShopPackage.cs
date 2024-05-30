@@ -13,6 +13,8 @@ namespace Moda.BackEnd.Domain.Models
     {
         [Key]
         public Guid Id { get; set; }
+        public DateTime? RegisteredDate { get; set; }
+        public bool IsValid { get; set; }
         public Guid ShopId { get; set; }
         [ForeignKey(nameof(ShopId))]
         public Shop Shop { get; set; } = null!;

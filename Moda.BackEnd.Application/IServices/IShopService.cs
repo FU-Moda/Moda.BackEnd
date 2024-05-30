@@ -16,6 +16,8 @@ namespace Moda.BackEnd.Application.IServices
         public Task<AppActionResult> UpdateShop(UpdateShopDto dto);
         public Task<AppActionResult> GetShopByAccountId(string Id);
         public Task<AppActionResult> GetShopAffiliateByShopId(Guid shopId, int pageNumber, int pageSize);
+        public Task<AppActionResult> GetTotalAffiliate(Guid? shopId, DateTime startDate, DateTime endDate);
+        public Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate);
         public Task<AppActionResult> GetShopWithBanner(int pageNumber, int pageSize);
         public Task<AppActionResult> AssignPackageForShop(Guid shopId, Guid optionPackageId);
     }

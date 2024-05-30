@@ -9,5 +9,7 @@ namespace Moda.BackEnd.Application.IServices
 {
     public interface IShopPackageService
     {
+        public Task<AppActionResult> UpdateShopPackageStatus();
+        public Task<AppActionResult> SendEndSupscriptionEmail();
     }
 }

@@ -65,6 +65,18 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetShopWithBanner(pageNumber, pageSize);
         }
 
+        [HttpGet("get-total-affiliate")]
+        public async Task<AppActionResult> GetTotalAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
+        {
+            return await _service.GetTotalAffiliate(shopId, startDate, endDate);
+        }
+
+        [HttpGet("get-total-order-detail-affiliate")]
+        public async Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
+        {
+            return await _service.GetTotalOrderDetailAffiliate(shopId, startDate, endDate);
+        }
+
         [RemoveCacheAtrribute("shop")]
         [HttpGet("remove-cache")]
         public IActionResult RemoveCache()
