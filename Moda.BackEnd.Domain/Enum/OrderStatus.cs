@@ -10,9 +10,7 @@ namespace Moda.BackEnd.Domain.Enum
     {
         PENDING,
         PREPARING,
-        DELIVERING,
-        SUCCESSFUL,
-        FAILED,
-        RETURNED
+        TRANSFERRED_TO_SHIPPING_UNIT,
+        CANCELLED
     }
 }
