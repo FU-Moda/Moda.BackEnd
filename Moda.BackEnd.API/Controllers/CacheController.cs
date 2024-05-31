@@ -19,7 +19,7 @@ namespace Moda.BackEnd.API.Controllers
             _responseCacheService = responseCacheService;
         }
 
-        [HttpPost("clear-cache/{pathEndPoint}")]
+        [HttpPost("clear-cache")]
         public async Task<IActionResult> ClearCacheAsync()
         {
             if (!_cacheConfiguration.Enabled)
