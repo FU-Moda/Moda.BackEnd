@@ -443,6 +443,34 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetShopOrderByStatus(Guid shopId, OrderStatus orderStatus, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+
+                var shopRepository = Resolve<IRepository<Shop>>();
+                var shopDb = await shopRepository!.GetById(shopId);
+                if(shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy cửa hàng với id {shopId}");
+                    return result;
+                }
+                var orderDetailRepository = Resolve<IRepository<OrderDetail>>();
+                var orderDetailDb = await orderDetailRepository!.GetAllDataByExpression(p => p.ProductStock.Product.ShopId == shopId, 0, 0, null, false, null);
+                if(orderDetailDb.Items != null && orderDetailDb.Items.Count > 0)
+                {
+                    var orderIds = orderDetailDb.Items.DistinctBy(o => o.OrderId).Select(o => o.OrderId);
+                    result.Result = await _orderRepository.GetAllDataByExpression(p => p.Status == orderStatus && orderIds.Contains(p.Id), pageNumber, pageSize, null, false, p => p.Account!, p => p.Coupon!);
+                }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
         {
             var result = new AppActionResult();
