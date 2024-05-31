@@ -110,6 +110,10 @@ namespace Moda.BackEnd.Application.Services
                         var configDb = new Configuration();
                         var packageOfShop = await shopPackageRepository!.GetAllDataByExpression(p => p.ShopId == productStock.Product!.ShopId, 0, 0, null, false, p => p.OptionPackageHistory.OptionPackage!);
                         var validPackage = packageOfShop.Items!.Where(p => p.IsValid).OrderByDescending(p => p.RegisteredDate).FirstOrDefault();
+                        if (validPackage == null)
+                        {
+                            result = BuildAppActionResultError(result, "Shop này chưa mua gói ");
+                        }
                         if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.STANDARD_CONFIG);
@@ -235,16 +239,21 @@ namespace Moda.BackEnd.Application.Services
                         await _orderDetailRepository.Insert(orderDetail);
 
                         var configDb = new Configuration();
-                        var packageOfShop = await shopPackageRepository!.GetByExpression(p => p.ShopId == productStock.Product!.ShopId, p => p.OptionPackageHistory.OptionPackage!);
-                        if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
+                        var packageOfShop = await shopPackageRepository!.GetAllDataByExpression(p => p.ShopId == productStock.Product!.ShopId, 0, 0, null, false, p => p.OptionPackageHistory.OptionPackage!);
+                        var validPackage = packageOfShop.Items!.Where(p => p.IsValid).OrderByDescending(p => p.RegisteredDate).FirstOrDefault();
+                        if (validPackage == null)
+                        {
+                            result = BuildAppActionResultError(result, "Shop này chưa mua gói ");
+                        }
+                        if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.STANDARD_CONFIG);
                         }
-                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
+                        else if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.MEDIUM_CONFIG);
                         }
-                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
+                        else if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.PREMIUM_CONFIG);
                         }
