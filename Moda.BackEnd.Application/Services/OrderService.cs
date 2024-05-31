@@ -108,16 +108,17 @@ namespace Moda.BackEnd.Application.Services
                         await _orderDetailRepository.Insert(orderDetail);
 
                         var configDb = new Configuration();
-                        var packageOfShop = await shopPackageRepository!.GetByExpression(p => p.ShopId == productStock.Product!.ShopId, p => p.OptionPackageHistory.OptionPackage!);
-                        if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
+                        var packageOfShop = await shopPackageRepository!.GetAllDataByExpression(p => p.ShopId == productStock.Product!.ShopId, 0, 0, null, false, p => p.OptionPackageHistory.OptionPackage!);
+                        var validPackage = packageOfShop.Items!.Where(p => p.IsValid).OrderByDescending(p => p.RegisteredDate).FirstOrDefault();
+                        if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.STANDARD_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.STANDARD_CONFIG);
                         }
-                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
+                        else if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.MEDIUM_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.MEDIUM_CONFIG);
                         }
-                        else if (packageOfShop!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
+                        else if (validPackage!.OptionPackageHistory.OptionPackage.PackageName == SD.ShopPackageName.PREMIUM_PACKAGE)
                         {
                             configDb = await configRepository!.GetByExpression(p => p!.Name == SD.ConfigName.PREMIUM_CONFIG);
                         }
@@ -209,7 +210,7 @@ namespace Moda.BackEnd.Application.Services
 
                     double total = 0;
                     double discount = 0;
-                    var discountPercent = Convert.ToDouble(couponDb.Percent);
+                    var discountPercent = Convert.ToDouble(couponDb!.Percent);
                     foreach (var item in orderRequest.ProductStockDtos)
                     {
                         var productStock = await productStockRepository!.GetByExpression(p => p!.Id == item.Id && p.Quantity >= item.Quantity, p => p.Product!);
@@ -417,7 +418,7 @@ namespace Moda.BackEnd.Application.Services
                 }
                 if (!BuildAppActionResultIsError(result))
                 {
-                    var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.OrderId == orderId, pageNumber, pageSize, null, false, p => p.ProductStock.Product);
+                    var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.OrderId == orderId, pageNumber, pageSize, null, false, p => p.ProductStock!.Product!);
                     OrderListResponse data = new OrderListResponse();
                     data.Order = orderDb!;
                     data.OrderDetails = orderDetailDb.Items!;
