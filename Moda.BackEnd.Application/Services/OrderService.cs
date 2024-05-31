@@ -309,7 +309,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     if (order != null)
                     {
-                        order.Status = OrderStatus.SUCCESSFUL;
+                        //order.Status = OrderStatus.SUCCESSFUL;
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }
@@ -446,7 +446,7 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus)
+        public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
         {
             var result = new AppActionResult();
             try
@@ -458,7 +458,9 @@ namespace Moda.BackEnd.Application.Services
                 }
                 else
                 {
-                    orderDb.Status = orderStatus;
+                    if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
+                    else if(orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.PREPARING;
+                    else orderDb.Status = OrderStatus.TRANSFERRED_TO_SHIPPING_UNIT;
                     await _unitOfWork.SaveChangesAsync();
                 }
 

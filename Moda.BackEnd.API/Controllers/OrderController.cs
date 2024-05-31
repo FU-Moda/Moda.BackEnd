@@ -92,9 +92,9 @@ namespace Moda.BackEnd.API.Controllers
 
         [HttpPut("update-status")]
         [RemoveCacheAtrribute("order")]
-        public async Task<AppActionResult> UpdateStatus(Guid orderId, OrderStatus orderStatus)
+        public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
         {
-            return await _orderService.UpdateStatus(orderId, orderStatus);      
+            return await _orderService.UpdateStatus(orderId, isSuccessful);      
         }
 
         [HttpGet("get-all-order-by-shop-id/{shopId}")]
