@@ -29,7 +29,6 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [RemoveCacheAtrribute("configuration")]
-        [HttpGet("remove-cache")]
         public IActionResult RemoveCache()
         {
             return Ok();
