@@ -294,32 +294,6 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
-        public async Task<AppActionResult> UpdatesSucessStatus(Guid orderId)
-        {
-            AppActionResult result = new AppActionResult();
-            try
-            {
-                var orderRepository = Resolve<IRepository<Order>>();
-                var order = await orderRepository!.GetById(orderId);
-                if (order == null)
-                {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy order với id {orderId}");
-                }
-                if (!BuildAppActionResultIsError(result))
-                {
-                    if (order != null)
-                    {
-                        //order.Status = OrderStatus.SUCCESSFUL;
-                        await _unitOfWork.SaveChangesAsync();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                result = BuildAppActionResultError(result, e.Message);
-            }
-            return result;
-        }
 
         public async Task<AppActionResult> GetAllOrder(int pageNumber, int pageSize)
         {
@@ -458,8 +432,8 @@ namespace Moda.BackEnd.Application.Services
                 }
                 else
                 {
-                    if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
-                    else if(orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.PREPARING;
+                    //if (!isSuccessful) orderDb.Status = OrderStatus.CANCELLED;
+                    if(orderDb.Status == OrderStatus.PENDING) orderDb.Status = OrderStatus.PREPARING;
                     else orderDb.Status = OrderStatus.TRANSFERRED_TO_SHIPPING_UNIT;
                     await _unitOfWork.SaveChangesAsync();
                 }

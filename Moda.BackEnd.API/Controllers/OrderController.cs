@@ -54,7 +54,7 @@ namespace Moda.BackEnd.API.Controllers
                 if (response.VnPayResponseCode == "00")
                 {
                     var orderId = response.OrderId.ToString().Split(" ");
-                    await _orderService.UpdatesSucessStatus(Guid.Parse(orderId[0]));
+                    //await _orderService.UpdatesSucessStatus(Guid.Parse(orderId[0]));
                    
                 }
             }
@@ -92,9 +92,9 @@ namespace Moda.BackEnd.API.Controllers
 
         [HttpPut("update-status")]
         [RemoveCacheAtrribute("order")]
-        public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
+        public async Task<AppActionResult> UpdateStatus(Guid orderId)
         {
-            return await _orderService.UpdateStatus(orderId, isSuccessful);      
+            return await _orderService.UpdateStatus(orderId, true);      
         }
 
         [HttpGet("get-all-order-by-shop-id/{shopId}")]
