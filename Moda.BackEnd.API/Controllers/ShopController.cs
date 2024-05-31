@@ -92,6 +92,12 @@ namespace Moda.BackEnd.API.Controllers
             return await _service.GetTotalAffiliate(shopId, startDate, endDate);
         }
 
+        [HttpGet("check-shop-package-subscription/{shopId}")]
+        public async Task<AppActionResult> CheckShopPackageSubscription(Guid shopId)
+        {
+            return await _service.CheckShopPackageSubscription(shopId);
+        }
+
         [HttpGet("get-total-order-detail-affiliate")]
         public async Task<AppActionResult> GetTotalOrderDetailAffiliate(Guid? shopId, DateTime startDate, DateTime endDate)
         {
