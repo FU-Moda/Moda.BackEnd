@@ -27,7 +27,7 @@ namespace Moda.BackEnd.API.Controllers
                 return Ok();
             }
 
-            var cacheKey = $"/{pathEndPoint}/";
+            var cacheKey = "/";
             await _responseCacheService.RemoveCacheResponseAsync(cacheKey);
             return Ok();
         }

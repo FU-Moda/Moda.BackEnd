@@ -1,5 +1,4 @@
-﻿using AspNetCoreRateLimit.Redis;
-using Moda.BackEnd.Application.IServices;
+﻿using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Application.Services;
 using Moda.BackEnd.Common.ConfigurationModel;
 using StackExchange.Redis;
