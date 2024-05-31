@@ -389,6 +389,20 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public async Task<AppActionResult> GetAllOrderByStatus(OrderStatus orderStatus, int pageNumber, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                result.Result = await _orderRepository.GetAllDataByExpression(p => p.Status == orderStatus, pageNumber, pageSize, null, false, p => p.Account!, p => p.Coupon!);
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
