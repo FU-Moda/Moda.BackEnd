@@ -450,10 +450,10 @@ namespace Moda.BackEnd.Application.Services
                     return result;
                 }
 
-                var shopPackageResult = await shopPackageRepository
+                var shopPackageResult = await shopPackageRepository!
                     .GetAllDataByExpression(p => p.ShopId == shopId, 0, 1, null, false, p => p.OptionPackageHistory);
 
-                var shopPackageDb = shopPackageResult.Items.FirstOrDefault();
+                var shopPackageDb = shopPackageResult!.Items!.FirstOrDefault();
                 if (shopPackageDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Shop với {shopId} chưa mua gói nào ");
