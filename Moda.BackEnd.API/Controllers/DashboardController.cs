@@ -24,14 +24,12 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-product-report")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetProductReport(int timePeriod, Guid? shopId)
         {
             return await _service.GetProductReport(timePeriod, shopId);
         }
 
         [HttpGet("get-revenue-report")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetRevenueReport(int timePeriod, Guid? shopId)
         {
             return await _service.GetRevenueReport(timePeriod, shopId);
