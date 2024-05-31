@@ -309,7 +309,7 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                result.Result = await _orderRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.Account!);
+                result.Result = await _orderRepository.GetAllDataByExpression(null, pageNumber, pageSize, null, false, p => p.Account!, p => p.Coupon);
             }
             catch (Exception ex)
             {
