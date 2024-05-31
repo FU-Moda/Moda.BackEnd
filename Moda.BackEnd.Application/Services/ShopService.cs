@@ -449,7 +449,11 @@ namespace Moda.BackEnd.Application.Services
                     result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
                     return result;
                 }
-                var shopPackageDb = await shopPackageRepository!.GetByExpression(p => p!.ShopId == shopId, p => p.OptionPackageHistory);
+
+                var shopPackageResult = await shopPackageRepository
+                    .GetAllDataByExpression(p => p.ShopId == shopId, 0, 1, null, false, p => p.OptionPackageHistory);
+
+                var shopPackageDb = shopPackageResult.Items.FirstOrDefault();
                 if (shopPackageDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Shop với {shopId} chưa mua gói nào ");
