@@ -22,7 +22,7 @@ namespace Moda.BackEnd.Application.Services
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Cóc Travel Company", _emailConfiguration.User));
+                message.From.Add(new MailboxAddress("MODA", _emailConfiguration.User));
                 message.To.Add(new MailboxAddress("Khách hàng", recipient));
                 message.Subject = subject;
                 message.Importance = MessageImportance.High;

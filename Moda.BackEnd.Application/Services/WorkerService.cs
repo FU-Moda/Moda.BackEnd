@@ -24,7 +24,6 @@ namespace Moda.BackEnd.Application.Services
             TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             RecurringJob.AddOrUpdate(() => _shopPackageService.SendEndSupscriptionEmail(), Cron.DayInterval(1), vietnamTimeZone);
             RecurringJob.AddOrUpdate(() => _shopPackageService.UpdateShopPackageStatus(), Common.Utils.Utility.ConvertToCronExpression(8, 30), vietnamTimeZone);
-            RecurringJob.AddOrUpdate(() => CheckSendEmail(), Cron.MinuteInterval(2), vietnamTimeZone);
         }
 
         public async Task CheckSendEmail()
