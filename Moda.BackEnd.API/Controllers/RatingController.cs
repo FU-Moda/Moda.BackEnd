@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Moda.Backend.Domain.Models;
 using Moda.BackEnd.API.Middlewares;
 using Moda.BackEnd.Application.IServices;
 using Moda.BackEnd.Common.DTO.Request;
@@ -18,31 +19,23 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPost("create-rating")]
-        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> CreateRating(CreateRatingRequest dto)
         {
             return await _service.CreateRating(dto);
         }
 
         [HttpPost("update-rating")]
-        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> UpdateRating(UpdateRatingDto dto)
         {
             return await _service.UpdateRating(dto);
         }
 
         [HttpDelete("delete-rating")]
-        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> DeleteRating(Guid Id)
         {
             return await _service.DeleteRating(Id);
         }
 
-        [RemoveCacheAtrribute("rating")]
-        [HttpGet("remove-cache")]
-        public IActionResult RemoveCache()
-        {
-            return Ok();
-        }
+     
     }
 }

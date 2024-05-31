@@ -396,7 +396,7 @@ namespace Moda.BackEnd.Application.Services
 
                 if (shopId != null)
                 {
-                    var shopDb = await shopRepository.GetById(shopId);
+                    var shopDb = await shopRepository!.GetById(shopId);
                     if (shopDb == null)
                     {
                         result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
@@ -427,6 +427,51 @@ namespace Moda.BackEnd.Application.Services
                 }
                 data.TotalProfit = total;
                 result.Result = data;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> CheckShopPackageSubscription(Guid shopId)
+        {
+            var optionPackageRepository = Resolve<IRepository<OptionPackage>>();
+            var shopRepository = Resolve<IRepository<Shop>>();
+            var shopPackageRepository = Resolve<IRepository<ShopPackage>>();
+            var result = new AppActionResult();
+            try
+            {
+                var shopDb = await shopRepository!.GetByExpression(p => p.Id == shopId);
+                if (shopDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy shop với {shopId}");
+                    return result;
+                }
+
+                var shopPackageResult = await shopPackageRepository!
+                    .GetAllDataByExpression(p => p.ShopId == shopId, 0, 1, null, false, p => p.OptionPackageHistory);
+
+                var shopPackageDb = shopPackageResult!.Items!.FirstOrDefault();
+                if (shopPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"Shop với {shopId} chưa mua gói nào ");
+                }
+                var optionPackageDb = await optionPackageRepository!.GetByExpression(p => p.OptionPackageId == shopPackageDb!.OptionPackageHistory.OptionPackageId);
+                if (optionPackageDb == null)
+                {
+                    result = BuildAppActionResultError(result, $"không tìm thấy gói với {shopPackageDb!.OptionPackageHistory.OptionPackageId}");
+                }
+                if (optionPackageDb!.Duration >= DateTime.Now)
+                {
+                    result.Result = optionPackageDb;
+                }
+                else if (optionPackageDb!.Duration <= DateTime.Now)
+                {
+                    result.Result = null;
+                    result.Messages.Add("Shop này đã hết hạn gói");
+                }
             }
             catch (Exception ex)
             {

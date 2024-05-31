@@ -21,13 +21,11 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPost("create-order-with-payment")]
-        [RemoveCacheAtrribute("order")]
         public async Task<AppActionResult> CreateOrderWithPayment( OrderRequest orderRequest)
         {
            return await _orderService.CreateOrderWithPayment(orderRequest, HttpContext);     
         }
         [HttpPost("create-order-cod")]
-        [RemoveCacheAtrribute("order")]
         public async Task<AppActionResult> CreateOrderCOD(OrderRequest orderRequest) 
         {
             return await _orderService.CreateOrderCOD(orderRequest);
@@ -70,42 +68,41 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-order/{pageNumber}/{pageSize}")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetAllOrder(int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrder(pageNumber, pageSize);       
         }
 
+        [HttpGet("get-all-order-by-status/{pageNumber}/{pageSize}")]
+        public async Task<AppActionResult> GetAllOrderByStatus(OrderStatus orderStatus,int pageNumber = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderByStatus(orderStatus, pageNumber, pageSize);
+        }
         [HttpGet("get-all-order-by-account-id/{accountId}/{pageNumber}/{pageSize}")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetAllOrderByAccountId(string accountId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByAccountId(accountId, pageNumber, pageSize);
         }
 
         [HttpGet("get-all-order-detail-by-order-id/{orderId}/{pageNumber}/{pageSize}")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderDetailByOrderId(orderId, pageNumber, pageSize);
         }
 
         [HttpPut("update-status")]
-        [RemoveCacheAtrribute("order")]
         public async Task<AppActionResult> UpdateStatus(Guid orderId)
         {
             return await _orderService.UpdateStatus(orderId, true);      
         }
 
         [HttpGet("get-all-order-by-shop-id/{shopId}")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetAllOrderByShopId(Guid shopId, int pageNumber = 1, int pageSize = 10)
         {
             return await _orderService.GetAllOrderByShopId(shopId, pageNumber, pageSize);
         }
 
         [HttpGet("get-order-details-by-order-id/{orderId}")]
-        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId)
         {
             return await _orderService.GetOrderDetailsByOrderId(orderId);
