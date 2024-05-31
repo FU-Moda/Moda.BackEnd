@@ -28,10 +28,6 @@ namespace Moda.BackEnd.API.Controllers
             return await _configurationService.UpdateConfiguration(configurationDto);   
         }
 
-        [RemoveCacheAtrribute("configuration")]
-        public IActionResult RemoveCache()
-        {
-            return Ok();
-        }
+       
     }
 }
