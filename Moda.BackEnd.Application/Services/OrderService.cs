@@ -380,6 +380,11 @@ namespace Moda.BackEnd.Application.Services
             return result;
         }
 
+        public Task<AppActionResult> GetAllOrderByStatus(OrderStatus orderStatus, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<AppActionResult> GetAllOrderDetailByOrderId(Guid orderId, int pageNumber, int pageSize)
         {
             var result = new AppActionResult();
@@ -418,6 +423,11 @@ namespace Moda.BackEnd.Application.Services
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
+        }
+
+        public Task<AppActionResult> GetShopOrderByStatus(Guid shopId, OrderStatus orderStatus, int pageNumber, int pageSize)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<AppActionResult> UpdateStatus(Guid orderId, bool isSuccessful)
