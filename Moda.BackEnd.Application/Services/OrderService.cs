@@ -408,7 +408,7 @@ namespace Moda.BackEnd.Application.Services
             var result = new AppActionResult();
             try
             {
-                var orderDb = await _orderRepository!.GetByExpression(p => p.Id == orderId);
+                var orderDb = await _orderRepository!.GetAllDataByExpression(p => p.Id == orderId,0 ,0 , null ,false, p => p.Account!);
                 if (orderDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Đơn hàng với {orderDb} không tồn tại");
@@ -417,7 +417,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     var orderDetailDb = await _orderDetailRepository.GetAllDataByExpression(p => p.OrderId == orderId, pageNumber, pageSize, null, false, p => p.ProductStock!.Product!);
                     OrderListResponse data = new OrderListResponse();
-                    data.Order = orderDb!;
+                    data.Order = orderDb.Items!.FirstOrDefault();
                     data.OrderDetails = orderDetailDb.Items!;
                     result.Result = data;
                 }
