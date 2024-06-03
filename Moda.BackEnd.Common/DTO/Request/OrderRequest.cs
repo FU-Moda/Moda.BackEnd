@@ -10,6 +10,6 @@ namespace Moda.BackEnd.Common.DTO.Request
     {
         public string AccountId { get; set; } = null!;
         public List<ProductStockDto> ProductStockDtos { get; set; } = null!;
-        public Guid CouponId { get; set; }  
+        public Guid? CouponId { get; set; }  
     }
 }
