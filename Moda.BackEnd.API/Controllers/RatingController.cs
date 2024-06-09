@@ -19,18 +19,21 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpPost("create-rating")]
+        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> CreateRating(CreateRatingRequest dto)
         {
             return await _service.CreateRating(dto);
         }
 
         [HttpPost("update-rating")]
+        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> UpdateRating(UpdateRatingDto dto)
         {
             return await _service.UpdateRating(dto);
         }
 
         [HttpDelete("delete-rating")]
+        [RemoveCacheAtrribute("rating")]
         public async Task<AppActionResult> DeleteRating(Guid Id)
         {
             return await _service.DeleteRating(Id);
