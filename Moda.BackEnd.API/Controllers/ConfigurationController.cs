@@ -18,11 +18,13 @@ namespace Moda.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-configuration/{pageNumber}/{pageSize}")]
+        [CacheAttribute(259200)]
         public async Task<AppActionResult> GetAllConfiguration(int pageNumber = 1, int pageSize = 10)
         {
             return await _configurationService.GetAllConfiguration(pageNumber, pageSize);
         }
         [HttpPut("update-configuration")]
+        [RemoveCacheAtrribute("configuration")]
         public async Task<AppActionResult> UpdateConfiguration(ConfigurationDto configurationDto)
         {
             return await _configurationService.UpdateConfiguration(configurationDto);   
