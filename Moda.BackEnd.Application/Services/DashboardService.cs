@@ -67,12 +67,7 @@ namespace Moda.BackEnd.Application.Services
                 {
                     predicate = o => o.Order.OrderTime.Year == timePeriod && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
                 }
-                else if (timePeriod == 0)
-                {
-                    comparisonDate = DateTime.Now.AddDays(-7);
-                    predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
-                }
-                else if (timePeriod == 1)
+                else if (timePeriod == 1 || timePeriod == 0)
                 {
                     comparisonDate = DateTime.Now.AddMonths(-1);
                     predicate = o => o.Order.OrderTime >= comparisonDate && (ShopId == null || o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard);
@@ -135,9 +130,6 @@ namespace Moda.BackEnd.Application.Services
             }
             return data;
         }
-
-
-
         public async Task<AppActionResult> GetRevenueReport(int timePeriod, Guid? ShopId = null)
         {
             AppActionResult result = new AppActionResult();
@@ -167,27 +159,7 @@ namespace Moda.BackEnd.Application.Services
                         }
                     }
                 }
-                else if (timePeriod == 0)
-                {
-                    if (ShopId != null)
-                    {
-                        var orderDetailFromShop = await _orderDetailRepository.GetAllDataByExpression(o => o.ProductStock.Product.ShopId == ShopId && isValidShopForDashboard, 0, 0, null, false, o => o.Order);
-                        if (orderDetailFromShop.Items != null && orderDetailFromShop.Items.Count > 0)
-                        {
-                            List<Order> orders = orderDetailFromShop.Items.DistinctBy(o => o.OrderId).Select(o => o.Order).ToList()!;
-                            result.Result = GetRevenueResponse(orders.Where(o => o.OrderTime.AddDays(7) >= DateTime.UtcNow).ToList(), timePeriod);
-                        }
-                    }
-                    else
-                    {
-                        orderDb = await _orderRepository.GetAllDataByExpression(o => o.OrderTime.AddDays(7) >= DateTime.UtcNow, 0, 0, null, false, null);
-                        if (orderDb.Items != null && orderDb.Items.Count > 0)
-                        {
-                            result.Result = GetRevenueResponse(orderDb.Items!, timePeriod);
-                        }
-                    }
-                }
-                else if (timePeriod == 1)
+                else if (timePeriod == 1 || timePeriod == 0)
                 {
                     if (ShopId != null)
                     {
